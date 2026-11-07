@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="BLL_DCM/BLL_DCM.csproj" />
+  <Project Path="DAL_DCM/DAL_DCM.csproj" />
+  <Project Path="DentalClinicManagement/GUI_DCM.csproj" />
+  <Project Path="DTO_DCM/DTO_DCM.csproj" />
+</Solution>
