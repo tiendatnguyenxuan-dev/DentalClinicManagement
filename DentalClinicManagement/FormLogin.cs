@@ -65,6 +65,11 @@ namespace DentalClinicManagement
                 Application.Exit();
             }
         }
+
+        private void lblHint_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }
 

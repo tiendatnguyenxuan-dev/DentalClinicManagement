@@ -34,7 +34,7 @@ namespace DentalClinicManagement
             labelTitle.ForeColor = Color.DarkSlateBlue;
             labelTitle.Location = new Point(230, 35);
             labelTitle.Name = "labelTitle";
-            labelTitle.Size = new Size(167, 38);
+            labelTitle.Size = new Size(188, 38);
             labelTitle.TabIndex = 0;
             labelTitle.Text = "ĐĂNG NHẬP";
             // 
@@ -103,9 +103,10 @@ namespace DentalClinicManagement
             lblHint.ForeColor = Color.Gray;
             lblHint.Location = new Point(135, 275);
             lblHint.Name = "lblHint";
-            lblHint.Size = new Size(365, 19);
+            lblHint.Size = new Size(385, 19);
             lblHint.TabIndex = 7;
             lblHint.Text = "Tài khoản test: admin/123456, bacsi/123456, letan/123456";
+            lblHint.Click += lblHint_Click;
             // 
             // FormLogin
             // 
@@ -113,7 +114,7 @@ namespace DentalClinicManagement
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             CancelButton = btnCancel;
-            ClientSize = new Size(620, 320);
+            ClientSize = new Size(678, 380);
             Controls.Add(lblHint);
             Controls.Add(btnCancel);
             Controls.Add(btnLogin);
