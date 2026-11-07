@@ -1,30 +1,65 @@
+using DTO_DCM;
+using MySqlConnector;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using DTO_DCM;
 
 namespace DAL_DCM
 {
     public class AccountDAL
     {
-        // Dữ liệu mẫu giả lập trong bộ nhớ (khi chưa kết nối CSDL)
-        private static readonly List<AccountDTO> _accounts = new()
+        private readonly DbConnection db = new DbConnection();
+
+        public AccountDAL()
         {
-            new AccountDTO("admin", "123456", "Quản Trị Viên", "Admin"),
-            new AccountDTO("bacsi", "123456", "BS. Nguyễn Văn An", "Doctor"),
-            new AccountDTO("letan", "123456", "Lễ Tân Trần Thị Mai", "Receptionist")
-        };
+            // Khởi tạo kết nối CSDL ở đây nếu cần
+        }
+
 
         /// <summary>
-        /// Kiểm tra thông tin đăng nhập.
-        /// Khi kết nối SQL Server, hàm này sẽ thực thi câu lệnh SQL:
-        /// SELECT * FROM Accounts WHERE Username = @u AND Password = @p
+        /// Kiểm tra thông tin đăng nhập từ MySQL
         /// </summary>
         public AccountDTO? CheckLogin(string username, string password)
         {
-            return _accounts.FirstOrDefault(a =>
-                a.Username.Equals(username, StringComparison.OrdinalIgnoreCase) &&
-                a.Password == password);
+            using (MySqlConnection conn = db.GetConnection())
+            {
+                try
+                {
+                    conn.Open();
+
+                    string query = @"
+                        SELECT *
+                        FROM Account
+                        WHERE Username = @username
+                        AND PasswordHash = @password
+                        LIMIT 1";
+
+                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@username", username);
+                        cmd.Parameters.AddWithValue("@password", password);
+
+                        using (MySqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                return new AccountDTO(
+                                    reader["Username"].ToString()!,
+                                    reader["PasswordHash"].ToString()!
+                            
+                                );
+                            }
+                        }
+                    }
+                }
+                catch (MySqlException ex)
+                {
+                    throw new Exception(
+                        "Lỗi kết nối hoặc truy vấn MySQL: " + ex.Message);
+                }
+            }
+
+            return null;
         }
     }
 }

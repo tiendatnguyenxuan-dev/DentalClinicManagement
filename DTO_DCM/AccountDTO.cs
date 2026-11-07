@@ -11,12 +11,11 @@ namespace DTO_DCM
         {
         }
 
-        public AccountDTO(string username, string password, string fullName, string role)
+        public AccountDTO(string username, string password)
         {
             Username = username;
             Password = password;
-            FullName = fullName;
-            Role = role;
+    
         }
     }
 }

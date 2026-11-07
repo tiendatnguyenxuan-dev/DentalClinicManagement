@@ -114,7 +114,7 @@ namespace DentalClinicManagement
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             CancelButton = btnCancel;
-            ClientSize = new Size(678, 380);
+            ClientSize = new Size(790, 414);
             Controls.Add(lblHint);
             Controls.Add(btnCancel);
             Controls.Add(btnLogin);
