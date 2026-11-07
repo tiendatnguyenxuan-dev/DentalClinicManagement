@@ -27,6 +27,7 @@ namespace DentalClinicManagement
             btnBilling = new Button();
             btnServices = new Button();
             btnReports = new Button();
+            btnWorkSchedule = new Button();
             panelContent = new Panel();
             lblWelcome = new Label();
             panelHeader.SuspendLayout();
@@ -88,6 +89,7 @@ namespace DentalClinicManagement
             panelSidebar.BackColor = Color.FromArgb(240, 242, 245);
             panelSidebar.Controls.Add(btnReports);
             panelSidebar.Controls.Add(btnServices);
+            panelSidebar.Controls.Add(btnWorkSchedule);
             panelSidebar.Controls.Add(btnBilling);
             panelSidebar.Controls.Add(btnAppointments);
             panelSidebar.Controls.Add(btnManagePatients);
@@ -169,6 +171,23 @@ namespace DentalClinicManagement
             btnReports.Text = " Báo Cáo Doanh Thu";
             btnReports.TextAlign = ContentAlignment.MiddleLeft;
             btnReports.UseVisualStyleBackColor = false;
+
+            // 
+            // btnWorkSchedule
+            // 
+            btnWorkSchedule.BackColor = Color.White;
+            btnWorkSchedule.FlatAppearance.BorderSize = 0;
+            btnWorkSchedule.FlatStyle = FlatStyle.Flat;
+            btnWorkSchedule.Font = new Font("Segoe UI", 10F);
+            btnWorkSchedule.Location = new Point(10, 290);
+            btnWorkSchedule.Name = "btnWorkSchedule";
+            btnWorkSchedule.Size = new Size(200, 45);
+            btnWorkSchedule.TabIndex = 5;
+            btnWorkSchedule.Text = " Quản lý lịch làm việc";
+            btnWorkSchedule.TextAlign = ContentAlignment.MiddleLeft;
+            btnWorkSchedule.UseVisualStyleBackColor = false;
+            btnWorkSchedule.Click += btnWorkSchedule_Click;
+
             // 
             // panelContent
             // 
@@ -223,6 +242,7 @@ namespace DentalClinicManagement
         private Button btnBilling;
         private Button btnServices;
         private Button btnReports;
+        private Button btnWorkSchedule;
         private Panel panelContent;
         private Label lblWelcome;
     }
