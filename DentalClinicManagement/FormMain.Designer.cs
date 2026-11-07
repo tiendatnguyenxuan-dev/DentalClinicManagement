@@ -25,8 +25,8 @@ namespace DentalClinicManagement
             btnManagePatients = new Button();
             btnAppointments = new Button();
             btnBilling = new Button();
-            btnReports = new Button();
             btnServices = new Button();
+            btnReports = new Button();
             panelContent = new Panel();
             lblWelcome = new Label();
             panelHeader.SuspendLayout();
@@ -125,6 +125,7 @@ namespace DentalClinicManagement
             btnAppointments.Text = " Lịch Khám / Điều Trị";
             btnAppointments.TextAlign = ContentAlignment.MiddleLeft;
             btnAppointments.UseVisualStyleBackColor = false;
+            btnAppointments.Click += btnAppointments_Click;
             // 
             // btnBilling
             // 
@@ -226,4 +227,3 @@ namespace DentalClinicManagement
         private Label lblWelcome;
     }
 }
-

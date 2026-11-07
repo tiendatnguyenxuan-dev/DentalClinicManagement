@@ -17,6 +17,7 @@ namespace DentalClinicManagement
 
         private void InitializeComponent()
         {
+            DataGridViewCellStyle dgvCellStyleDate = new DataGridViewCellStyle();
             panelTop = new Panel();
             lblTitle = new Label();
             grpInfo = new GroupBox();
@@ -76,7 +77,7 @@ namespace DentalClinicManagement
             lblTitle.ForeColor = Color.White;
             lblTitle.Location = new Point(15, 10);
             lblTitle.Name = "lblTitle";
-            lblTitle.Size = new Size(258, 31);
+            lblTitle.Size = new Size(265, 31);
             lblTitle.TabIndex = 0;
             lblTitle.Text = "QUẢN LÝ BỆNH NHÂN";
             // 
@@ -119,7 +120,7 @@ namespace DentalClinicManagement
             lblMedicalHistory.AutoSize = true;
             lblMedicalHistory.Location = new Point(515, 115);
             lblMedicalHistory.Name = "lblMedicalHistory";
-            lblMedicalHistory.Size = new Size(101, 21);
+            lblMedicalHistory.Size = new Size(100, 21);
             lblMedicalHistory.TabIndex = 12;
             lblMedicalHistory.Text = "Tiền sử bệnh:";
             // 
@@ -179,7 +180,7 @@ namespace DentalClinicManagement
             // 
             cboGender.DropDownStyle = ComboBoxStyle.DropDownList;
             cboGender.FormattingEnabled = true;
-            cboGender.Items.AddRange(new object[] { "Nam", "Nữ" });
+            cboGender.Items.AddRange(new object[] { "Nam", "Nữ", "Khác" });
             cboGender.Location = new Point(130, 110);
             cboGender.Name = "cboGender";
             cboGender.Size = new Size(340, 29);
@@ -257,6 +258,7 @@ namespace DentalClinicManagement
             // 
             btnDelete.BackColor = Color.Crimson;
             btnDelete.FlatStyle = FlatStyle.Flat;
+            btnDelete.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnDelete.ForeColor = Color.White;
             btnDelete.Location = new Point(320, 5);
             btnDelete.Name = "btnDelete";
@@ -335,7 +337,6 @@ namespace DentalClinicManagement
             txtSearch.PlaceholderText = "Nhập tên, số điện thoại hoặc mã bệnh nhân...";
             txtSearch.Size = new Size(350, 27);
             txtSearch.TabIndex = 1;
-            txtSearch.TextChanged += txtSearch_TextChanged;
             txtSearch.KeyDown += txtSearch_KeyDown;
             // 
             // lblSearch
@@ -356,20 +357,20 @@ namespace DentalClinicManagement
             dgvPatients.BackgroundColor = Color.White;
             dgvPatients.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvPatients.Columns.AddRange(new DataGridViewColumn[] { colId, colName, colGender, colDOB, colPhone, colAddress, colHistory });
-            dgvPatients.Location = new Point(12, 489);
+            dgvPatients.Location = new Point(15, 355);
             dgvPatients.MultiSelect = false;
             dgvPatients.Name = "dgvPatients";
             dgvPatients.ReadOnly = true;
             dgvPatients.RowHeadersVisible = false;
             dgvPatients.RowHeadersWidth = 51;
             dgvPatients.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvPatients.Size = new Size(970, 109);
+            dgvPatients.Size = new Size(970, 240);
             dgvPatients.TabIndex = 4;
             dgvPatients.CellClick += dgvPatients_CellClick;
             // 
             // colId
             // 
-            colId.DataPropertyName = "PatientId";
+            colId.DataPropertyName = "PatientID";
             colId.FillWeight = 50F;
             colId.HeaderText = "Mã BN";
             colId.MinimumWidth = 6;
@@ -397,6 +398,8 @@ namespace DentalClinicManagement
             // colDOB
             // 
             colDOB.DataPropertyName = "DateOfBirth";
+            dgvCellStyleDate.Format = "dd/MM/yyyy";
+            colDOB.DefaultCellStyle = dgvCellStyleDate;
             colDOB.FillWeight = 65F;
             colDOB.HeaderText = "Ngày sinh";
             colDOB.MinimumWidth = 6;
@@ -405,7 +408,7 @@ namespace DentalClinicManagement
             // 
             // colPhone
             // 
-            colPhone.DataPropertyName = "PhoneNumber";
+            colPhone.DataPropertyName = "Phone";
             colPhone.FillWeight = 75F;
             colPhone.HeaderText = "Số điện thoại";
             colPhone.MinimumWidth = 6;
@@ -495,4 +498,3 @@ namespace DentalClinicManagement
         private DataGridViewTextBoxColumn colHistory;
     }
 }
-

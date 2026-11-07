@@ -1,4 +1,3 @@
-
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
@@ -14,8 +13,6 @@ namespace DentalClinicManagement
         public FormPatient()
         {
             InitializeComponent();
-
-            // Cho phép người dùng không nhập ngày sinh
             dtpDOB.ShowCheckBox = true;
         }
 
@@ -28,19 +25,23 @@ namespace DentalClinicManagement
             ResetForm();
         }
 
-        // Hiển thị danh sách bệnh nhân
         private void LoadPatientList(List<PatientDTO>? list = null)
         {
-            dgvPatients.AutoGenerateColumns = false;
-            dgvPatients.DataSource = null;
-            dgvPatients.DataSource = list ?? _patientBLL.GetAllPatients();
+            try
+            {
+                dgvPatients.AutoGenerateColumns = false;
+                dgvPatients.DataSource = null;
+                dgvPatients.DataSource = list ?? _patientBLL.GetAllPatients();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi tải danh sách bệnh nhân: {ex.Message}", "Lỗi CSDL", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
-        // Đổi giới tính hiển thị sang giá trị ENUM trong database
         private string GetDatabaseGender()
         {
             string gender = cboGender.SelectedItem?.ToString() ?? "";
-
             return gender switch
             {
                 "Nam" => "Male",
@@ -50,7 +51,6 @@ namespace DentalClinicManagement
             };
         }
 
-        // Đổi giá trị ENUM trong database sang tiếng Việt
         private string GetDisplayGender(string? gender)
         {
             return gender switch
@@ -62,12 +62,9 @@ namespace DentalClinicManagement
             };
         }
 
-        // Làm mới form
         private void ResetForm()
         {
-            // ID được MySQL tự động tạo
             txtPatientId.Text = "Tự động";
-
             txtFullName.Clear();
 
             if (cboGender.Items.Count > 0)
@@ -87,7 +84,6 @@ namespace DentalClinicManagement
             txtFullName.Focus();
         }
 
-        // Chọn bệnh nhân trên DataGridView
         private void dgvPatients_CellClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex < 0 || e.RowIndex >= dgvPatients.Rows.Count)
@@ -97,7 +93,6 @@ namespace DentalClinicManagement
             {
                 txtPatientId.Text = patient.PatientID.ToString();
                 txtFullName.Text = patient.FullName;
-
                 cboGender.SelectedItem = GetDisplayGender(patient.Gender);
 
                 if (patient.DateOfBirth.HasValue)
@@ -121,62 +116,41 @@ namespace DentalClinicManagement
             }
         }
 
-        // Tạo đối tượng PatientDTO từ dữ liệu trên form
         private PatientDTO GetPatientFromForm()
         {
             return new PatientDTO
             {
                 FullName = txtFullName.Text.Trim(),
                 Gender = GetDatabaseGender(),
-                DateOfBirth = dtpDOB.Checked
-                    ? dtpDOB.Value.Date
-                    : null,
-                Phone = string.IsNullOrWhiteSpace(txtPhone.Text)
-                    ? null
-                    : txtPhone.Text.Trim(),
-                Address = string.IsNullOrWhiteSpace(txtAddress.Text)
-                    ? null
-                    : txtAddress.Text.Trim(),
-                MedicalHistory = string.IsNullOrWhiteSpace(txtMedicalHistory.Text)
-                    ? null
-                    : txtMedicalHistory.Text.Trim()
+                DateOfBirth = dtpDOB.Checked ? dtpDOB.Value.Date : null,
+                Phone = string.IsNullOrWhiteSpace(txtPhone.Text) ? null : txtPhone.Text.Trim(),
+                Address = string.IsNullOrWhiteSpace(txtAddress.Text) ? null : txtAddress.Text.Trim(),
+                MedicalHistory = string.IsNullOrWhiteSpace(txtMedicalHistory.Text) ? null : txtMedicalHistory.Text.Trim()
             };
         }
 
-        // Thêm bệnh nhân
         private void btnAdd_Click(object sender, EventArgs e)
         {
             PatientDTO newPatient = GetPatientFromForm();
-
             var (isSuccess, message) = _patientBLL.AddPatient(newPatient);
 
             if (isSuccess)
             {
-                MessageBox.Show(
-                    message,
-                    "Thông báo",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information);
-
+                MessageBox.Show(message, "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 LoadPatientList();
                 ResetForm();
             }
             else
             {
-                MessageBox.Show(
-                    message,
-                    "Cảnh báo",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
+                MessageBox.Show(message, "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
-        // Cập nhật bệnh nhân
         private void btnUpdate_Click(object sender, EventArgs e)
         {
             if (!int.TryParse(txtPatientId.Text, out int patientID))
             {
-                MessageBox.Show("Vui lòng chọn bệnh nhân cần cập nhật!");
+                MessageBox.Show("Vui lòng chọn bệnh nhân cần cập nhật!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -187,38 +161,27 @@ namespace DentalClinicManagement
 
             if (isSuccess)
             {
-                MessageBox.Show(
-                    message,
-                    "Thông báo",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information);
-
+                MessageBox.Show(message, "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 LoadPatientList();
                 ResetForm();
             }
             else
             {
-                MessageBox.Show(
-                    message,
-                    "Cảnh báo",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
+                MessageBox.Show(message, "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
-        // Xóa bệnh nhân
         private void btnDelete_Click(object sender, EventArgs e)
         {
             if (!int.TryParse(txtPatientId.Text, out int patientID))
             {
-                MessageBox.Show("Vui lòng chọn bệnh nhân cần xóa!");
+                MessageBox.Show("Vui lòng chọn bệnh nhân cần xóa!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             string fullName = txtFullName.Text.Trim();
-
             DialogResult confirm = MessageBox.Show(
-                $"Bạn có chắc chắn muốn xóa bệnh nhân '{fullName}' (Mã: {patientID}) không?",
+                $"Bạn có chắc chắn muốn xóa bệnh nhân '{fullName}' (Mã BN: {patientID}) khỏi danh sách?",
                 "Xác nhận xóa",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question);
@@ -229,43 +192,29 @@ namespace DentalClinicManagement
 
                 if (isSuccess)
                 {
-                    MessageBox.Show(
-                        message,
-                        "Thông báo",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Information);
-
+                    MessageBox.Show(message, "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     LoadPatientList();
                     ResetForm();
                 }
                 else
                 {
-                    MessageBox.Show(
-                        message,
-                        "Lỗi",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Error);
+                    MessageBox.Show(message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
 
-        // Làm mới form
         private void btnClear_Click(object sender, EventArgs e)
         {
             ResetForm();
         }
 
-        // Tìm kiếm bệnh nhân
         private void btnSearch_Click(object sender, EventArgs e)
         {
             string keyword = txtSearch.Text.Trim();
-
             var results = _patientBLL.SearchPatients(keyword);
-
             LoadPatientList(results);
         }
 
-        // Tải lại danh sách
         private void btnRefresh_Click(object sender, EventArgs e)
         {
             txtSearch.Clear();
@@ -273,7 +222,6 @@ namespace DentalClinicManagement
             ResetForm();
         }
 
-        // Nhấn Enter để tìm kiếm
         private void txtSearch_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter)
@@ -281,11 +229,6 @@ namespace DentalClinicManagement
                 e.SuppressKeyPress = true;
                 btnSearch_Click(sender, e);
             }
-        }
-
-        private void txtSearch_TextChanged(object sender, EventArgs e)
-        {
-
         }
     }
 }

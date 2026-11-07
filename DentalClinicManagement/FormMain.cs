@@ -1,7 +1,8 @@
+using DTO_DCM;
+using GUI_DCM;
 using System;
 using System.Drawing;
 using System.Windows.Forms;
-using DTO_DCM;
 
 namespace DentalClinicManagement
 {
@@ -78,6 +79,12 @@ namespace DentalClinicManagement
             formService.ShowDialog();
         }
 
+        private void btnAppointments_Click(object sender, EventArgs e)
+        {
+            FormAppointment formApp = new FormAppointment();
+            formApp.ShowDialog();
+        }
+
         private void btnLogout_Click(object sender, EventArgs e)
         {
             DialogResult dialog = MessageBox.Show(
@@ -93,4 +100,3 @@ namespace DentalClinicManagement
         }
     }
 }
-
