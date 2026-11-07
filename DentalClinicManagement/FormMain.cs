@@ -1,7 +1,8 @@
+using DTO_DCM;
+using GUI_DCM;
 using System;
 using System.Drawing;
 using System.Windows.Forms;
-using DTO_DCM;
 
 namespace DentalClinicManagement
 {
@@ -75,6 +76,12 @@ namespace DentalClinicManagement
             {
                 this.Close(); // Đóng FormMain, FormLogin sẽ tự động hiện lại
             }
+        }
+
+        private void btnAppointments_Click(object sender, EventArgs e)
+        {
+            FormAppointment formApp = new FormAppointment();
+            formApp.ShowDialog();
         }
     }
 }
