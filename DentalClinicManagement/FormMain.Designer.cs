@@ -158,6 +158,7 @@ namespace DentalClinicManagement
             btnManagePatients.Text = " Quản lý Bệnh Nhân";
             btnManagePatients.TextAlign = ContentAlignment.MiddleLeft;
             btnManagePatients.UseVisualStyleBackColor = false;
+            btnManagePatients.Click += btnManagePatients_Click;
             // 
             // panelContent
             // 
@@ -217,4 +218,3 @@ namespace DentalClinicManagement
         private Label lblWelcome;
     }
 }
-

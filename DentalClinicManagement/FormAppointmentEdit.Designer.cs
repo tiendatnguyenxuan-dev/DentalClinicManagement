@@ -20,7 +20,8 @@
             panelHeader = new Panel();
             lblTitle = new Label();
             lblPatient = new Label();
-            cbPatient = new ComboBox();
+            txtPatientDisplay = new TextBox();
+            btnSelectPatient = new Button();
             lblDoctor = new Label();
             cbDoctor = new ComboBox();
             lblDateTime = new Label();
@@ -59,95 +60,110 @@
             // 
             lblPatient.AutoSize = true;
             lblPatient.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
-            lblPatient.Location = new Point(30, 80);
+            lblPatient.Location = new Point(30, 70);
             lblPatient.Name = "lblPatient";
             lblPatient.Size = new Size(171, 21);
             lblPatient.TabIndex = 1;
             lblPatient.Text = "Bệnh nhân (bắt buộc):";
             // 
-            // cbPatient
+            // txtPatientDisplay
             // 
-            cbPatient.DropDownStyle = ComboBoxStyle.DropDownList;
-            cbPatient.FormattingEnabled = true;
-            cbPatient.Location = new Point(30, 105);
-            cbPatient.Name = "cbPatient";
-            cbPatient.Size = new Size(460, 28);
-            cbPatient.TabIndex = 2;
+            txtPatientDisplay.BackColor = Color.WhiteSmoke;
+            txtPatientDisplay.Location = new Point(30, 95);
+            txtPatientDisplay.Name = "txtPatientDisplay";
+            txtPatientDisplay.ReadOnly = true;
+            txtPatientDisplay.Size = new Size(340, 27);
+            txtPatientDisplay.TabIndex = 2;
+            txtPatientDisplay.Text = "--- Bấm [Chọn bệnh nhân] để tìm ---";
+            // 
+            // btnSelectPatient
+            // 
+            btnSelectPatient.BackColor = Color.SlateBlue;
+            btnSelectPatient.FlatStyle = FlatStyle.Flat;
+            btnSelectPatient.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnSelectPatient.ForeColor = Color.White;
+            btnSelectPatient.Location = new Point(380, 94);
+            btnSelectPatient.Name = "btnSelectPatient";
+            btnSelectPatient.Size = new Size(110, 29);
+            btnSelectPatient.TabIndex = 3;
+            btnSelectPatient.Text = "🔍 Chọn BN";
+            btnSelectPatient.UseVisualStyleBackColor = false;
+            btnSelectPatient.Click += btnSelectPatient_Click;
             // 
             // lblDoctor
             // 
             lblDoctor.AutoSize = true;
             lblDoctor.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
-            lblDoctor.Location = new Point(30, 150);
+            lblDoctor.Location = new Point(30, 140);
             lblDoctor.Name = "lblDoctor";
             lblDoctor.Size = new Size(135, 21);
-            lblDoctor.TabIndex = 3;
+            lblDoctor.TabIndex = 4;
             lblDoctor.Text = "Bác sĩ phụ trách:";
             // 
             // cbDoctor
             // 
             cbDoctor.DropDownStyle = ComboBoxStyle.DropDownList;
             cbDoctor.FormattingEnabled = true;
-            cbDoctor.Location = new Point(30, 175);
+            cbDoctor.Location = new Point(30, 165);
             cbDoctor.Name = "cbDoctor";
             cbDoctor.Size = new Size(460, 28);
-            cbDoctor.TabIndex = 4;
+            cbDoctor.TabIndex = 5;
             // 
             // lblDateTime
             // 
             lblDateTime.AutoSize = true;
             lblDateTime.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
-            lblDateTime.Location = new Point(30, 220);
+            lblDateTime.Location = new Point(30, 210);
             lblDateTime.Name = "lblDateTime";
             lblDateTime.Size = new Size(160, 21);
-            lblDateTime.TabIndex = 5;
+            lblDateTime.TabIndex = 6;
             lblDateTime.Text = "Thời gian khám hẹn:";
             // 
             // dtpDateTime
             // 
             dtpDateTime.CustomFormat = "dd/MM/yyyy HH:mm";
             dtpDateTime.Format = DateTimePickerFormat.Custom;
-            dtpDateTime.Location = new Point(30, 245);
+            dtpDateTime.Location = new Point(30, 235);
             dtpDateTime.Name = "dtpDateTime";
             dtpDateTime.Size = new Size(220, 27);
-            dtpDateTime.TabIndex = 6;
+            dtpDateTime.TabIndex = 7;
             // 
             // lblStatus
             // 
             lblStatus.AutoSize = true;
             lblStatus.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
-            lblStatus.Location = new Point(270, 220);
+            lblStatus.Location = new Point(270, 210);
             lblStatus.Name = "lblStatus";
             lblStatus.Size = new Size(91, 21);
-            lblStatus.TabIndex = 7;
+            lblStatus.TabIndex = 8;
             lblStatus.Text = "Trạng thái:";
             // 
             // cbStatus
             // 
             cbStatus.DropDownStyle = ComboBoxStyle.DropDownList;
             cbStatus.FormattingEnabled = true;
-            cbStatus.Location = new Point(270, 245);
+            cbStatus.Location = new Point(270, 235);
             cbStatus.Name = "cbStatus";
             cbStatus.Size = new Size(220, 28);
-            cbStatus.TabIndex = 8;
+            cbStatus.TabIndex = 9;
             // 
             // lblNotes
             // 
             lblNotes.AutoSize = true;
-            lblNotes.Location = new Point(30, 290);
+            lblNotes.Location = new Point(30, 280);
             lblNotes.Name = "lblNotes";
             lblNotes.Size = new Size(125, 20);
-            lblNotes.TabIndex = 9;
+            lblNotes.TabIndex = 10;
             lblNotes.Text = "Ghi chú / Lý do khám:";
             // 
             // txtNotes
             // 
-            txtNotes.Location = new Point(30, 315);
+            txtNotes.Location = new Point(30, 305);
             txtNotes.Multiline = true;
             txtNotes.Name = "txtNotes";
             txtNotes.ScrollBars = ScrollBars.Vertical;
             txtNotes.Size = new Size(460, 80);
-            txtNotes.TabIndex = 10;
+            txtNotes.TabIndex = 11;
             // 
             // btnSave
             // 
@@ -155,10 +171,10 @@
             btnSave.FlatStyle = FlatStyle.Flat;
             btnSave.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             btnSave.ForeColor = Color.White;
-            btnSave.Location = new Point(260, 415);
+            btnSave.Location = new Point(260, 405);
             btnSave.Name = "btnSave";
             btnSave.Size = new Size(115, 38);
-            btnSave.TabIndex = 11;
+            btnSave.TabIndex = 12;
             btnSave.Text = "Lưu thông tin";
             btnSave.UseVisualStyleBackColor = false;
             btnSave.Click += btnSave_Click;
@@ -167,10 +183,10 @@
             // 
             btnCancel.BackColor = Color.WhiteSmoke;
             btnCancel.FlatStyle = FlatStyle.Flat;
-            btnCancel.Location = new Point(390, 415);
+            btnCancel.Location = new Point(390, 405);
             btnCancel.Name = "btnCancel";
             btnCancel.Size = new Size(100, 38);
-            btnCancel.TabIndex = 12;
+            btnCancel.TabIndex = 13;
             btnCancel.Text = "Hủy bỏ";
             btnCancel.UseVisualStyleBackColor = true;
             btnCancel.Click += btnCancel_Click;
@@ -181,7 +197,7 @@
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             CancelButton = btnCancel;
-            ClientSize = new Size(520, 475);
+            ClientSize = new Size(520, 465);
             Controls.Add(btnCancel);
             Controls.Add(btnSave);
             Controls.Add(txtNotes);
@@ -192,7 +208,8 @@
             Controls.Add(lblDateTime);
             Controls.Add(cbDoctor);
             Controls.Add(lblDoctor);
-            Controls.Add(cbPatient);
+            Controls.Add(btnSelectPatient);
+            Controls.Add(txtPatientDisplay);
             Controls.Add(lblPatient);
             Controls.Add(panelHeader);
             FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -212,7 +229,8 @@
         private Panel panelHeader;
         private Label lblTitle;
         private Label lblPatient;
-        private ComboBox cbPatient;
+        private TextBox txtPatientDisplay;
+        private Button btnSelectPatient;
         private Label lblDoctor;
         private ComboBox cbDoctor;
         private Label lblDateTime;

@@ -64,6 +64,12 @@ namespace DentalClinicManagement
             }
         }
 
+        private void btnManagePatients_Click(object sender, EventArgs e)
+        {
+            FormPatient formPatient = new FormPatient();
+            formPatient.ShowDialog();
+        }
+
         private void btnLogout_Click(object sender, EventArgs e)
         {
             DialogResult dialog = MessageBox.Show(

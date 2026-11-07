@@ -290,9 +290,10 @@ namespace DAL_DCM
             using (MySqlConnection conn = _db.GetConnection())
             {
                 string query = @"
-                    SELECT PatientID, FullName, Phone
-                    FROM Patient
-                    ORDER BY FullName ASC";
+            SELECT PatientID, FullName, Phone
+            FROM Patient
+            WHERE IsDeleted = 0
+            ORDER BY FullName ASC";
 
                 using (MySqlCommand cmd = new MySqlCommand(query, conn))
                 {

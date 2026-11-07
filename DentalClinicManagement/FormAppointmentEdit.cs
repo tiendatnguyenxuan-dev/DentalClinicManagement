@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Windows.Forms;
-using BLL_DCM;
+﻿using BLL_DCM;
 using DTO_DCM;
 
 namespace GUI_DCM
@@ -10,19 +7,24 @@ namespace GUI_DCM
     {
         private readonly AppointmentBLL _appointmentBLL = new AppointmentBLL();
         private AppointmentDTO? _editingAppointment;
+        private int _selectedPatientId = 0; // Lưu ID bệnh nhân đã chọn
 
         public FormAppointmentEdit(AppointmentDTO? appointmentToEdit = null)
         {
             InitializeComponent();
             _editingAppointment = appointmentToEdit;
 
-            LoadDataComboboxes();
+            LoadDoctorsAndStatuses();
 
             if (_editingAppointment == null)
             {
                 lblTitle.Text = "THÊM LỊCH HẸN MỚI";
                 dtpDateTime.Value = DateTime.Now.AddHours(1);
                 cbStatus.SelectedItem = "Pending";
+
+                // MẶC ĐỊNH ĐỂ TRỐNG BỆNH NHÂN
+                txtPatientDisplay.Text = "--- Bấm [Chọn bệnh nhân] để tìm ---";
+                _selectedPatientId = 0;
             }
             else
             {
@@ -31,21 +33,15 @@ namespace GUI_DCM
             }
         }
 
-        private void LoadDataComboboxes()
+        private void LoadDoctorsAndStatuses()
         {
-            // Nạp danh sách bệnh nhân
-            var patients = _appointmentBLL.GetPatientLookupList();
-            cbPatient.DataSource = patients;
-            cbPatient.DisplayMember = "DisplayText";
-            cbPatient.ValueMember = "PatientID";
-
-            // Nạp danh sách bác sĩ
+            // Bác sĩ
             var doctors = _appointmentBLL.GetDoctorLookupList();
             cbDoctor.DataSource = doctors;
             cbDoctor.DisplayMember = "DisplayText";
             cbDoctor.ValueMember = "EmployeeID";
 
-            // Nạp trạng thái
+            // Trạng thái
             cbStatus.Items.Clear();
             cbStatus.Items.AddRange(new object[] { "Pending", "Confirmed", "Completed", "Cancelled", "NoShow" });
             cbStatus.SelectedIndex = 0;
@@ -53,16 +49,30 @@ namespace GUI_DCM
 
         private void FillFormWithData(AppointmentDTO app)
         {
-            cbPatient.SelectedValue = app.PatientID;
+            _selectedPatientId = app.PatientID;
+            txtPatientDisplay.Text = $"{app.PatientName} - SĐT: {app.PatientPhone}";
             cbDoctor.SelectedValue = app.DoctorID;
             dtpDateTime.Value = app.AppointmentDateTime;
             cbStatus.SelectedItem = app.AppointmentStatus;
             txtNotes.Text = app.Notes ?? string.Empty;
         }
 
+        // Sự kiện khi bấm nút "Chọn bệnh nhân"
+        private void btnSelectPatient_Click(object sender, EventArgs e)
+        {
+            using (var lookupForm = new FormPatientLookup())
+            {
+                if (lookupForm.ShowDialog() == DialogResult.OK && lookupForm.SelectedPatient != null)
+                {
+                    _selectedPatientId = lookupForm.SelectedPatient.PatientID;
+                    txtPatientDisplay.Text = lookupForm.SelectedPatient.DisplayText;
+                }
+            }
+        }
+
         private void btnSave_Click(object sender, EventArgs e)
         {
-            if (cbPatient.SelectedValue == null)
+            if (_selectedPatientId <= 0)
             {
                 MessageBox.Show("Vui lòng chọn bệnh nhân.", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
@@ -75,22 +85,15 @@ namespace GUI_DCM
             }
 
             AppointmentDTO dto = _editingAppointment ?? new AppointmentDTO();
-            dto.PatientID = Convert.ToInt32(cbPatient.SelectedValue);
+            dto.PatientID = _selectedPatientId;
             dto.DoctorID = Convert.ToInt32(cbDoctor.SelectedValue);
             dto.AppointmentDateTime = dtpDateTime.Value;
             dto.AppointmentStatus = cbStatus.SelectedItem?.ToString() ?? "Pending";
             dto.Notes = txtNotes.Text.Trim();
 
-            OperationResult result;
-
-            if (_editingAppointment == null)
-            {
-                result = _appointmentBLL.AddAppointment(dto);
-            }
-            else
-            {
-                result = _appointmentBLL.UpdateAppointment(dto);
-            }
+            OperationResult result = _editingAppointment == null
+                ? _appointmentBLL.AddAppointment(dto)
+                : _appointmentBLL.UpdateAppointment(dto);
 
             if (!result.IsSuccess)
             {
