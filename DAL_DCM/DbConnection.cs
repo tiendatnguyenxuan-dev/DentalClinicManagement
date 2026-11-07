@@ -12,7 +12,7 @@ namespace DAL_DCM
             "Port=3306;" +
             "Database=DentalClinic;" +
             "Uid=root;" +
-            "Pwd=123456;";
+            "Pwd=1234;";
 
         public MySqlConnection GetConnection()
         {
