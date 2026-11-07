@@ -4,26 +4,15 @@ namespace DTO_DCM
 {
     public class PatientDTO
     {
-        public string PatientId { get; set; } = string.Empty;
+        public int PatientID { get; set; }
         public string FullName { get; set; } = string.Empty;
-        public string Gender { get; set; } = "Nam";
-        public DateTime DateOfBirth { get; set; } = DateTime.Now.AddYears(-20);
-        public string PhoneNumber { get; set; } = string.Empty;
-        public string Address { get; set; } = string.Empty;
-        public string MedicalHistory { get; set; } = string.Empty;
-
-        public PatientDTO() { }
-
-        public PatientDTO(string patientId, string fullName, string gender, DateTime dob, string phone, string address, string medicalHistory)
-        {
-            PatientId = patientId;
-            FullName = fullName;
-            Gender = gender;
-            DateOfBirth = dob;
-            PhoneNumber = phone;
-            Address = address;
-            MedicalHistory = medicalHistory;
-        }
+        public DateTime? DateOfBirth { get; set; }
+        public string? Gender { get; set; }
+        public string? Phone { get; set; }
+        public string? Email { get; set; }
+        public string? Address { get; set; }
+        public string? MedicalHistory { get; set; }
+        public string? Allergies { get; set; }
+        public DateTime RegistrationDate { get; set; }
     }
 }
-

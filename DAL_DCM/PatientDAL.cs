@@ -1,91 +1,263 @@
+
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using DTO_DCM;
+using MySqlConnector;
 
 namespace DAL_DCM
 {
     public class PatientDAL
     {
-        // Danh sách bệnh nhân mẫu trong bộ nhớ (sẽ được thay bằng SQL Server qua ADO.NET)
-        private static readonly List<PatientDTO> _patients = new()
-        {
-            new PatientDTO("BN001", "Hoàng Đức Thịnh", "Nam", new DateTime(1995, 4, 12), "0905111222", "Quận 1, TP.HCM", "Không dị ứng thuốc"),
-            new PatientDTO("BN002", "Võ Thị Ngọc", "Nữ", new DateTime(2001, 8, 25), "0918333444", "Bình Thạnh, TP.HCM", "Huyết áp thấp"),
-            new PatientDTO("BN003", "Lê Minh Khang", "Nam", new DateTime(1988, 11, 3), "0932555666", "Quận 7, TP.HCM", "Dị ứng Penicillin")
-        };
+        private readonly DbConnection _db = new();
 
-        public List<PatientDTO> GetAll()
-        {
-            return _patients.ToList();
-        }
-
-        public PatientDTO? GetById(string patientId)
-        {
-            return _patients.FirstOrDefault(p => p.PatientId.Equals(patientId, StringComparison.OrdinalIgnoreCase));
-        }
-
+        // 1. Thêm bệnh nhân
         public bool Add(PatientDTO patient)
         {
-            if (_patients.Any(p => p.PatientId.Equals(patient.PatientId, StringComparison.OrdinalIgnoreCase)))
+            using (MySqlConnection conn = _db.GetConnection())
             {
-                return false; // Mã trùng
-            }
-            _patients.Add(patient);
-            return true;
-        }
+                conn.Open();
 
-        public bool Update(PatientDTO patient)
-        {
-            var existing = _patients.FirstOrDefault(p => p.PatientId.Equals(patient.PatientId, StringComparison.OrdinalIgnoreCase));
-            if (existing == null) return false;
+                string query = @"
+                    INSERT INTO Patient
+                    (
+                        FullName,
+                        DateOfBirth,
+                        Gender,
+                        Phone,
+                        Email,
+                        Address,
+                        MedicalHistory,
+                        Allergies
+                    )
+                    VALUES
+                    (
+                        @FullName,
+                        @DateOfBirth,
+                        @Gender,
+                        @Phone,
+                        @Email,
+                        @Address,
+                        @MedicalHistory,
+                        @Allergies
+                    );";
 
-            existing.FullName = patient.FullName;
-            existing.Gender = patient.Gender;
-            existing.DateOfBirth = patient.DateOfBirth;
-            existing.PhoneNumber = patient.PhoneNumber;
-            existing.Address = patient.Address;
-            existing.MedicalHistory = patient.MedicalHistory;
-            return true;
-        }
-
-        public bool Delete(string patientId)
-        {
-            var existing = _patients.FirstOrDefault(p => p.PatientId.Equals(patientId, StringComparison.OrdinalIgnoreCase));
-            if (existing == null) return false;
-
-            _patients.Remove(existing);
-            return true;
-        }
-
-        public List<PatientDTO> Search(string keyword)
-        {
-            if (string.IsNullOrWhiteSpace(keyword)) return GetAll();
-
-            keyword = keyword.Trim().ToLower();
-            return _patients.Where(p =>
-                p.PatientId.ToLower().Contains(keyword) ||
-                p.FullName.ToLower().Contains(keyword) ||
-                p.PhoneNumber.Contains(keyword) ||
-                p.Address.ToLower().Contains(keyword)
-            ).ToList();
-        }
-
-        public string GenerateNextId()
-        {
-            int maxId = 0;
-            foreach (var p in _patients)
-            {
-                if (p.PatientId.StartsWith("BN", StringComparison.OrdinalIgnoreCase))
+                using (MySqlCommand cmd = new MySqlCommand(query, conn))
                 {
-                    if (int.TryParse(p.PatientId.Substring(2), out int num))
+                    cmd.Parameters.AddWithValue("@FullName", patient.FullName);
+                    cmd.Parameters.AddWithValue("@DateOfBirth",
+                        (object?)patient.DateOfBirth ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Gender",
+                        (object?)patient.Gender ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Phone",
+                        (object?)patient.Phone ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Email",
+                        (object?)patient.Email ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Address",
+                        (object?)patient.Address ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@MedicalHistory",
+                        (object?)patient.MedicalHistory ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Allergies",
+                        (object?)patient.Allergies ?? DBNull.Value);
+
+                    return cmd.ExecuteNonQuery() > 0;
+                }
+            }
+        }
+
+        // 2. Lấy tất cả bệnh nhân
+        public List<PatientDTO> GetAll()
+        {
+            List<PatientDTO> list = new();
+
+            using (MySqlConnection conn = _db.GetConnection())
+            {
+                conn.Open();
+
+                string query = @"
+                    SELECT *
+                    FROM Patient
+                    ORDER BY PatientID ASC;";
+
+                using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                using (MySqlDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
                     {
-                        if (num > maxId) maxId = num;
+                        list.Add(MapReaderToPatient(reader));
                     }
                 }
             }
-            return $"BN{(maxId + 1):D3}";
+
+            return list;
+        }
+
+        // 3. Lấy bệnh nhân theo ID
+        public PatientDTO? GetById(int patientId)
+        {
+            using (MySqlConnection conn = _db.GetConnection())
+            {
+                conn.Open();
+
+                string query = @"
+                    SELECT *
+                    FROM Patient
+                    WHERE PatientID = @PatientID
+                    LIMIT 1;";
+
+                using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@PatientID", patientId);
+
+                    using (MySqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            return MapReaderToPatient(reader);
+                        }
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        // 4. Cập nhật bệnh nhân
+        public bool Update(PatientDTO patient)
+        {
+            using (MySqlConnection conn = _db.GetConnection())
+            {
+                conn.Open();
+
+                string query = @"
+                    UPDATE Patient
+                    SET
+                        FullName = @FullName,
+                        DateOfBirth = @DateOfBirth,
+                        Gender = @Gender,
+                        Phone = @Phone,
+                        Email = @Email,
+                        Address = @Address,
+                        MedicalHistory = @MedicalHistory,
+                        Allergies = @Allergies
+                    WHERE PatientID = @PatientID;";
+
+                using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@PatientID", patient.PatientID);
+                    cmd.Parameters.AddWithValue("@FullName", patient.FullName);
+                    cmd.Parameters.AddWithValue("@DateOfBirth",
+                        (object?)patient.DateOfBirth ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Gender",
+                        (object?)patient.Gender ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Phone",
+                        (object?)patient.Phone ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Email",
+                        (object?)patient.Email ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Address",
+                        (object?)patient.Address ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@MedicalHistory",
+                        (object?)patient.MedicalHistory ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Allergies",
+                        (object?)patient.Allergies ?? DBNull.Value);
+
+                    return cmd.ExecuteNonQuery() > 0;
+                }
+            }
+        }
+
+        // 5. Xóa bệnh nhân
+        public bool Delete(int patientId)
+        {
+            using (MySqlConnection conn = _db.GetConnection())
+            {
+                conn.Open();
+
+                string query = @"
+                    DELETE FROM Patient
+                    WHERE PatientID = @PatientID;";
+
+                using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@PatientID", patientId);
+
+                    return cmd.ExecuteNonQuery() > 0;
+                }
+            }
+        }
+
+        // 6. Tìm kiếm bệnh nhân
+        public List<PatientDTO> Search(string keyword)
+        {
+            List<PatientDTO> list = new();
+
+            using (MySqlConnection conn = _db.GetConnection())
+            {
+                conn.Open();
+
+                string query = @"
+                    SELECT *
+                    FROM Patient
+                    WHERE CAST(PatientID AS CHAR) LIKE @Keyword
+                       OR FullName LIKE @Keyword
+                       OR Phone LIKE @Keyword
+                       OR Email LIKE @Keyword
+                    ORDER BY PatientID ASC;";
+
+                using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@Keyword", $"%{keyword.Trim()}%");
+
+                    using (MySqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            list.Add(MapReaderToPatient(reader));
+                        }
+                    }
+                }
+            }
+
+            return list;
+        }
+
+        // Mapping dữ liệu từ MySQL sang PatientDTO
+        private static PatientDTO MapReaderToPatient(MySqlDataReader reader)
+        {
+            return new PatientDTO
+            {
+                PatientID = Convert.ToInt32(reader["PatientID"]),
+                FullName = reader["FullName"].ToString() ?? string.Empty,
+
+                DateOfBirth = reader["DateOfBirth"] == DBNull.Value
+                    ? null
+                    : Convert.ToDateTime(reader["DateOfBirth"]),
+
+                Gender = reader["Gender"] == DBNull.Value
+                    ? null
+                    : reader["Gender"].ToString(),
+
+                Phone = reader["Phone"] == DBNull.Value
+                    ? null
+                    : reader["Phone"].ToString(),
+
+                Email = reader["Email"] == DBNull.Value
+                    ? null
+                    : reader["Email"].ToString(),
+
+                Address = reader["Address"] == DBNull.Value
+                    ? null
+                    : reader["Address"].ToString(),
+
+                MedicalHistory = reader["MedicalHistory"] == DBNull.Value
+                    ? null
+                    : reader["MedicalHistory"].ToString(),
+
+                Allergies = reader["Allergies"] == DBNull.Value
+                    ? null
+                    : reader["Allergies"].ToString(),
+
+                RegistrationDate = Convert.ToDateTime(reader["RegistrationDate"])
+            };
         }
     }
 }
-
