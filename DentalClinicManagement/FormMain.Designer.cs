@@ -26,6 +26,7 @@ namespace DentalClinicManagement
             btnAppointments = new Button();
             btnBilling = new Button();
             btnReports = new Button();
+            btnServices = new Button();
             panelContent = new Panel();
             lblWelcome = new Label();
             panelHeader.SuspendLayout();
@@ -86,6 +87,7 @@ namespace DentalClinicManagement
             // 
             panelSidebar.BackColor = Color.FromArgb(240, 242, 245);
             panelSidebar.Controls.Add(btnReports);
+            panelSidebar.Controls.Add(btnServices);
             panelSidebar.Controls.Add(btnBilling);
             panelSidebar.Controls.Add(btnAppointments);
             panelSidebar.Controls.Add(btnManagePatients);
@@ -138,16 +140,31 @@ namespace DentalClinicManagement
             btnBilling.TextAlign = ContentAlignment.MiddleLeft;
             btnBilling.UseVisualStyleBackColor = false;
             // 
+            // btnServices
+            // 
+            btnServices.BackColor = Color.White;
+            btnServices.FlatAppearance.BorderSize = 0;
+            btnServices.FlatStyle = FlatStyle.Flat;
+            btnServices.Font = new Font("Segoe UI", 10F);
+            btnServices.Location = new Point(10, 180);
+            btnServices.Name = "btnServices";
+            btnServices.Size = new Size(200, 45);
+            btnServices.TabIndex = 3;
+            btnServices.Text = " Quản lý Dịch Vụ";
+            btnServices.TextAlign = ContentAlignment.MiddleLeft;
+            btnServices.UseVisualStyleBackColor = false;
+            btnServices.Click += btnServices_Click;
+            // 
             // btnReports
             // 
             btnReports.BackColor = Color.White;
             btnReports.FlatAppearance.BorderSize = 0;
             btnReports.FlatStyle = FlatStyle.Flat;
             btnReports.Font = new Font("Segoe UI", 10F);
-            btnReports.Location = new Point(10, 180);
+            btnReports.Location = new Point(10, 235);
             btnReports.Name = "btnReports";
             btnReports.Size = new Size(200, 45);
-            btnReports.TabIndex = 3;
+            btnReports.TabIndex = 4;
             btnReports.Text = " Báo Cáo Doanh Thu";
             btnReports.TextAlign = ContentAlignment.MiddleLeft;
             btnReports.UseVisualStyleBackColor = false;
@@ -203,6 +220,7 @@ namespace DentalClinicManagement
         private Button btnManagePatients;
         private Button btnAppointments;
         private Button btnBilling;
+        private Button btnServices;
         private Button btnReports;
         private Panel panelContent;
         private Label lblWelcome;

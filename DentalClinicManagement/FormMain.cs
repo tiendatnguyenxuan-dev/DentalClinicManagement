@@ -35,6 +35,7 @@ namespace DentalClinicManagement
                     btnManagePatients.Enabled = true;
                     btnAppointments.Enabled = true;
                     btnBilling.Enabled = true;
+                    btnServices.Enabled = true;
                     btnReports.Enabled = true;
                     break;
 
@@ -43,6 +44,7 @@ namespace DentalClinicManagement
                     btnManagePatients.Enabled = true;
                     btnAppointments.Enabled = true;
                     btnBilling.Enabled = false;
+                    btnServices.Enabled = true;
                     btnReports.Enabled = false;
                     btnReports.BackColor = Color.LightGray;
                     btnBilling.BackColor = Color.LightGray;
@@ -53,6 +55,7 @@ namespace DentalClinicManagement
                     btnManagePatients.Enabled = true;
                     btnAppointments.Enabled = true;
                     btnBilling.Enabled = true;
+                    btnServices.Enabled = true;
                     btnReports.Enabled = false;
                     btnReports.BackColor = Color.LightGray;
                     break;
@@ -67,6 +70,12 @@ namespace DentalClinicManagement
         {
             FormPatient formPatient = new FormPatient();
             formPatient.ShowDialog();
+        }
+
+        private void btnServices_Click(object sender, EventArgs e)
+        {
+            FormService formService = new FormService();
+            formService.ShowDialog();
         }
 
         private void btnLogout_Click(object sender, EventArgs e)
