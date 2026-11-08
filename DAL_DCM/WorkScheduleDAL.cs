@@ -1,4 +1,3 @@
-
 using System;
 using System.Collections.Generic;
 using MySqlConnector;
@@ -37,6 +36,88 @@ namespace DAL_DCM
             }
 
             return schedules;
+        }
+
+        // Lấy lịch theo khoảng thời gian (phục vụ xem lịch tuần)
+        public List<WorkScheduleDTO> GetSchedulesByDateRange(DateTime fromDate, DateTime toDate)
+        {
+            List<WorkScheduleDTO> schedules = new();
+
+            using var conn = _db.GetConnection();
+            conn.Open();
+
+            string query = @"
+                SELECT ws.ScheduleID,
+                       ws.DoctorID,
+                       e.FullName AS DoctorName,
+                       ws.WorkDate,
+                       ws.Shift
+                FROM WorkSchedule ws
+                INNER JOIN Employee e ON ws.DoctorID = e.EmployeeID
+                WHERE ws.WorkDate >= @FromDate AND ws.WorkDate <= @ToDate
+                ORDER BY ws.WorkDate ASC, ws.Shift ASC";
+
+            using var cmd = new MySqlCommand(query, conn);
+            cmd.Parameters.AddWithValue("@FromDate", fromDate.Date);
+            cmd.Parameters.AddWithValue("@ToDate", toDate.Date);
+
+            using var reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                schedules.Add(MapReaderToSchedule(reader));
+            }
+
+            return schedules;
+        }
+
+        // Lấy lịch của 1 nhân viên trong 1 ngày cụ thể (để kiểm tra xung đột ca làm việc)
+        public List<WorkScheduleDTO> GetSchedulesByDoctorAndDate(int doctorID, DateTime workDate, int excludeScheduleID = 0)
+        {
+            List<WorkScheduleDTO> schedules = new();
+
+            using var conn = _db.GetConnection();
+            conn.Open();
+
+            string query = @"
+                SELECT ws.ScheduleID,
+                       ws.DoctorID,
+                       e.FullName AS DoctorName,
+                       ws.WorkDate,
+                       ws.Shift
+                FROM WorkSchedule ws
+                INNER JOIN Employee e ON ws.DoctorID = e.EmployeeID
+                WHERE ws.DoctorID = @DoctorID 
+                  AND ws.WorkDate = @WorkDate
+                  AND ws.ScheduleID != @ExcludeScheduleID";
+
+            using var cmd = new MySqlCommand(query, conn);
+            cmd.Parameters.AddWithValue("@DoctorID", doctorID);
+            cmd.Parameters.AddWithValue("@WorkDate", workDate.Date);
+            cmd.Parameters.AddWithValue("@ExcludeScheduleID", excludeScheduleID);
+
+            using var reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                schedules.Add(MapReaderToSchedule(reader));
+            }
+
+            return schedules;
+        }
+
+        // Kiểm tra nhân viên có đang hoạt động (Active) hay không
+        public bool IsEmployeeActive(int doctorID)
+        {
+            using var conn = _db.GetConnection();
+            conn.Open();
+
+            string query = "SELECT COUNT(1) FROM Employee WHERE EmployeeID = @DoctorID AND EmploymentStatus = 'Active'";
+
+            using var cmd = new MySqlCommand(query, conn);
+            cmd.Parameters.AddWithValue("@DoctorID", doctorID);
+
+            return Convert.ToInt32(cmd.ExecuteScalar()) > 0;
         }
 
         // Lấy lịch theo ID
@@ -158,10 +239,11 @@ namespace DAL_DCM
             return schedules;
         }
 
-        // Lấy danh sách bác sĩ phục vụ chọn trên giao diện
-        public List<DoctorLookupDTO> GetDoctors()
+        // Lấy danh sách tất cả nhân viên đang hoạt động
+        public List<DoctorLookupDTO> GetEmployees()
         {
-            List<DoctorLookupDTO> doctors = new();
+            List<DoctorLookupDTO> employees = new();
+
             using var conn = _db.GetConnection();
             conn.Open();
 
@@ -169,22 +251,29 @@ namespace DAL_DCM
                 SELECT e.EmployeeID, e.FullName, s.SpecialtyName
                 FROM Employee e
                 LEFT JOIN Specialty s ON e.SpecialtyID = s.SpecialtyID
-                WHERE e.Position = 'Doctor' AND e.EmploymentStatus = 'Active'
+                WHERE e.EmploymentStatus = 'Active'
                 ORDER BY e.FullName ASC";
 
             using var cmd = new MySqlCommand(query, conn);
             using var reader = cmd.ExecuteReader();
+
             while (reader.Read())
             {
-                doctors.Add(new DoctorLookupDTO
+                employees.Add(new DoctorLookupDTO
                 {
                     EmployeeID = Convert.ToInt32(reader["EmployeeID"]),
                     FullName = reader["FullName"].ToString()!,
-                    SpecialtyName = reader["SpecialtyName"] != DBNull.Value ? reader["SpecialtyName"].ToString() : null
+                    SpecialtyName = reader["SpecialtyName"] != DBNull.Value
+                        ? reader["SpecialtyName"].ToString()
+                        : null
                 });
             }
-            return doctors;
+
+            return employees;
         }
+
+        // Giữ tương thích ngược với code cũ gọi GetDoctors()
+        public List<DoctorLookupDTO> GetDoctors() => GetEmployees();
 
         // Chuyển dữ liệu từ MySQL sang DTO
         private WorkScheduleDTO MapReaderToSchedule(MySqlDataReader reader)
@@ -193,7 +282,7 @@ namespace DAL_DCM
             {
                 ScheduleID = Convert.ToInt32(reader["ScheduleID"]),
                 DoctorID = Convert.ToInt32(reader["DoctorID"]),
-                DoctorName = reader["DoctorName"].ToString(),
+                DoctorName = reader["DoctorName"] != DBNull.Value ? reader["DoctorName"].ToString() : string.Empty,
                 WorkDate = Convert.ToDateTime(reader["WorkDate"]),
                 Shift = reader["Shift"].ToString()!
             };
