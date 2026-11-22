@@ -1,4 +1,4 @@
-﻿namespace GUI_DCM
+namespace GUI_DCM
 {
     partial class FormAppointment
     {
@@ -36,6 +36,7 @@
             btnAdd = new Button();
             btnEdit = new Button();
             btnUpdateStatus = new Button();
+            btnStartExam = new Button();
             btnDelete = new Button();
             dgvAppointments = new DataGridView();
             panelTopFilter.SuspendLayout();
@@ -194,6 +195,7 @@
             // panelActionBar
             // 
             panelActionBar.BackColor = Color.White;
+            panelActionBar.Controls.Add(btnStartExam);
             panelActionBar.Controls.Add(btnDelete);
             panelActionBar.Controls.Add(btnUpdateStatus);
             panelActionBar.Controls.Add(btnEdit);
@@ -245,6 +247,20 @@
             btnUpdateStatus.Text = " Đổi trạng thái...";
             btnUpdateStatus.UseVisualStyleBackColor = false;
             btnUpdateStatus.Click += btnUpdateStatus_Click;
+            // 
+            // btnStartExam
+            // 
+            btnStartExam.BackColor = Color.ForestGreen;
+            btnStartExam.FlatStyle = FlatStyle.Flat;
+            btnStartExam.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnStartExam.ForeColor = Color.White;
+            btnStartExam.Location = new Point(465, 8);
+            btnStartExam.Name = "btnStartExam";
+            btnStartExam.Size = new Size(160, 34);
+            btnStartExam.TabIndex = 4;
+            btnStartExam.Text = " Tiếp nhận khám";
+            btnStartExam.UseVisualStyleBackColor = false;
+            btnStartExam.Click += btnStartExam_Click;
             // 
             // btnDelete
             // 
@@ -326,6 +342,7 @@
         private Button btnAdd;
         private Button btnEdit;
         private Button btnUpdateStatus;
+        private Button btnStartExam;
         private Button btnDelete;
         private DataGridView dgvAppointments;
     }

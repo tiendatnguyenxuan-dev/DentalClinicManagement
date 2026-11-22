@@ -1,4 +1,4 @@
-﻿using BLL_DCM;
+using BLL_DCM;
 using DTO_DCM;
 
 namespace GUI_DCM
@@ -184,6 +184,17 @@ namespace GUI_DCM
                     MessageBox.Show(result.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
+        }
+
+        private void btnStartExam_Click(object sender, EventArgs e)
+        {
+            var selected = GetSelectedAppointment();
+            if (selected == null) return;
+
+            // Mở form khám bệnh truyền lịch hẹn sang
+            var formExam = new DentalClinicManagement.FormExamination(selected);
+            formExam.ShowDialog();
+            LoadAppointments();
         }
     }
 }

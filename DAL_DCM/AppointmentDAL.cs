@@ -1,4 +1,4 @@
-﻿using MySqlConnector;
+using MySqlConnector;
 using DTO_DCM;
 using System;
 using System.Collections.Generic;
@@ -189,6 +189,23 @@ namespace DAL_DCM
 
                     conn.Open();
                     return cmd.ExecuteNonQuery() > 0;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Kiểm tra lịch hẹn đã có hồ sơ khám bệnh liên kết hay chưa
+        /// </summary>
+        public bool IsAppointmentLinkedToExamination(int appointmentId)
+        {
+            using (MySqlConnection conn = _db.GetConnection())
+            {
+                string query = "SELECT COUNT(1) FROM Examination WHERE AppointmentID = @appointmentId";
+                using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@appointmentId", appointmentId);
+                    conn.Open();
+                    return Convert.ToInt32(cmd.ExecuteScalar()) > 0;
                 }
             }
         }

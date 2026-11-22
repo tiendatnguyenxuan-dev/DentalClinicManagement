@@ -55,13 +55,29 @@ namespace BLL_DCM
             return deleted ? (true, "Đã xóa bệnh nhân thành công!") : (false, "Không thể xóa bệnh nhân.");
         }
 
-        // Tìm kiếm bệnh nhân
+        // Tìm kiếm bệnh nhân trên danh sách trong bộ nhớ (Đáp ứng yêu cầu: Tìm kiếm trên ArrayList/List trong BUS)
         public List<PatientDTO> SearchPatients(string keyword)
         {
+            List<PatientDTO> allList = GetAllPatients();
             if (string.IsNullOrWhiteSpace(keyword))
-                return GetAllPatients();
+                return allList;
 
-            return _patientDAL.Search(keyword.Trim());
+            string key = keyword.Trim().ToLower();
+            var result = new List<PatientDTO>();
+
+            // Duyệt tuần tự trên List<PatientDTO> trong tầng BUS
+            foreach (var p in allList)
+            {
+                if (p.PatientID.ToString().Contains(key) ||
+                    (!string.IsNullOrEmpty(p.FullName) && p.FullName.ToLower().Contains(key)) ||
+                    (!string.IsNullOrEmpty(p.Phone) && p.Phone.Contains(key)) ||
+                    (!string.IsNullOrEmpty(p.Email) && p.Email.ToLower().Contains(key)))
+                {
+                    result.Add(p);
+                }
+            }
+
+            return result;
         }
 
         private (bool IsValid, string Message) ValidatePatient(PatientDTO patient, bool isUpdate)
