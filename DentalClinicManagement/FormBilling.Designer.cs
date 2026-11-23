@@ -33,6 +33,21 @@ namespace DentalClinicManagement
             colStatus = new DataGridViewTextBoxColumn();
             colDate = new DataGridViewTextBoxColumn();
             grpPay = new GroupBox();
+            tabBillingDetails = new TabControl();
+            tabServices = new TabPage();
+            dgvInvoiceServices = new DataGridView();
+            colIS_ServiceName = new DataGridViewTextBoxColumn();
+            colIS_Quantity = new DataGridViewTextBoxColumn();
+            colIS_UnitPrice = new DataGridViewTextBoxColumn();
+            colIS_TotalPrice = new DataGridViewTextBoxColumn();
+            tabPrescriptions = new TabPage();
+            dgvInvoicePrescriptions = new DataGridView();
+            colIP_MedicineName = new DataGridViewTextBoxColumn();
+            colIP_Unit = new DataGridViewTextBoxColumn();
+            colIP_Quantity = new DataGridViewTextBoxColumn();
+            colIP_UnitPrice = new DataGridViewTextBoxColumn();
+            colIP_TotalPrice = new DataGridViewTextBoxColumn();
+            tabPayments = new TabPage();
             dgvPayments = new DataGridView();
             colPayID = new DataGridViewTextBoxColumn();
             colPayMethod = new DataGridViewTextBoxColumn();
@@ -67,6 +82,12 @@ namespace DentalClinicManagement
             splitContainer.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvInvoices).BeginInit();
             grpPay.SuspendLayout();
+            tabBillingDetails.SuspendLayout();
+            tabServices.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)dgvInvoiceServices).BeginInit();
+            tabPrescriptions.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)dgvInvoicePrescriptions).BeginInit();
+            tabPayments.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvPayments).BeginInit();
             ((System.ComponentModel.ISupportInitialize)nudPayAmount).BeginInit();
             SuspendLayout();
@@ -242,7 +263,7 @@ namespace DentalClinicManagement
             // 
             grpPay.Controls.Add(btnPrintPdf);
             grpPay.Controls.Add(btnExportExcel);
-            grpPay.Controls.Add(dgvPayments);
+            grpPay.Controls.Add(tabBillingDetails);
             grpPay.Controls.Add(btnPay);
             grpPay.Controls.Add(cboPayMethod);
             grpPay.Controls.Add(lblMethod);
@@ -269,20 +290,179 @@ namespace DentalClinicManagement
             grpPay.TabStop = false;
             grpPay.Text = "Chi tiết & Thanh toán hóa đơn";
             // 
+            // tabBillingDetails
+            // 
+            tabBillingDetails.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            tabBillingDetails.Controls.Add(tabServices);
+            tabBillingDetails.Controls.Add(tabPrescriptions);
+            tabBillingDetails.Controls.Add(tabPayments);
+            tabBillingDetails.Location = new Point(15, 325);
+            tabBillingDetails.Name = "tabBillingDetails";
+            tabBillingDetails.SelectedIndex = 0;
+            tabBillingDetails.Size = new Size(475, 180);
+            tabBillingDetails.TabIndex = 18;
+            // 
+            // tabServices
+            // 
+            tabServices.Controls.Add(dgvInvoiceServices);
+            tabServices.Location = new Point(4, 29);
+            tabServices.Name = "tabServices";
+            tabServices.Padding = new Padding(3);
+            tabServices.Size = new Size(467, 147);
+            tabServices.TabIndex = 0;
+            tabServices.Text = "Dịch vụ";
+            tabServices.UseVisualStyleBackColor = true;
+            // 
+            // dgvInvoiceServices
+            // 
+            dgvInvoiceServices.AllowUserToAddRows = false;
+            dgvInvoiceServices.AllowUserToDeleteRows = false;
+            dgvInvoiceServices.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvInvoiceServices.BackgroundColor = Color.White;
+            dgvInvoiceServices.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvInvoiceServices.Columns.AddRange(new DataGridViewColumn[] { colIS_ServiceName, colIS_Quantity, colIS_UnitPrice, colIS_TotalPrice });
+            dgvInvoiceServices.Dock = DockStyle.Fill;
+            dgvInvoiceServices.Location = new Point(3, 3);
+            dgvInvoiceServices.MultiSelect = false;
+            dgvInvoiceServices.Name = "dgvInvoiceServices";
+            dgvInvoiceServices.ReadOnly = true;
+            dgvInvoiceServices.RowHeadersVisible = false;
+            dgvInvoiceServices.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgvInvoiceServices.Size = new Size(461, 141);
+            dgvInvoiceServices.TabIndex = 0;
+            // 
+            // colIS_ServiceName
+            // 
+            colIS_ServiceName.DataPropertyName = "ServiceName";
+            colIS_ServiceName.FillWeight = 130F;
+            colIS_ServiceName.HeaderText = "Tên dịch vụ";
+            colIS_ServiceName.Name = "colIS_ServiceName";
+            colIS_ServiceName.ReadOnly = true;
+            // 
+            // colIS_Quantity
+            // 
+            colIS_Quantity.DataPropertyName = "Quantity";
+            colIS_Quantity.FillWeight = 40F;
+            colIS_Quantity.HeaderText = "SL";
+            colIS_Quantity.Name = "colIS_Quantity";
+            colIS_Quantity.ReadOnly = true;
+            // 
+            // colIS_UnitPrice
+            // 
+            colIS_UnitPrice.DataPropertyName = "UnitPrice";
+            colIS_UnitPrice.DefaultCellStyle.Format = "#,##0 đ";
+            colIS_UnitPrice.FillWeight = 70F;
+            colIS_UnitPrice.HeaderText = "Đơn giá";
+            colIS_UnitPrice.Name = "colIS_UnitPrice";
+            colIS_UnitPrice.ReadOnly = true;
+            // 
+            // colIS_TotalPrice
+            // 
+            colIS_TotalPrice.DataPropertyName = "TotalPrice";
+            colIS_TotalPrice.DefaultCellStyle.Format = "#,##0 đ";
+            colIS_TotalPrice.FillWeight = 80F;
+            colIS_TotalPrice.HeaderText = "Thành tiền";
+            colIS_TotalPrice.Name = "colIS_TotalPrice";
+            colIS_TotalPrice.ReadOnly = true;
+            // 
+            // tabPrescriptions
+            // 
+            tabPrescriptions.Controls.Add(dgvInvoicePrescriptions);
+            tabPrescriptions.Location = new Point(4, 29);
+            tabPrescriptions.Name = "tabPrescriptions";
+            tabPrescriptions.Padding = new Padding(3);
+            tabPrescriptions.Size = new Size(467, 147);
+            tabPrescriptions.TabIndex = 1;
+            tabPrescriptions.Text = "Đơn thuốc";
+            tabPrescriptions.UseVisualStyleBackColor = true;
+            // 
+            // dgvInvoicePrescriptions
+            // 
+            dgvInvoicePrescriptions.AllowUserToAddRows = false;
+            dgvInvoicePrescriptions.AllowUserToDeleteRows = false;
+            dgvInvoicePrescriptions.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvInvoicePrescriptions.BackgroundColor = Color.White;
+            dgvInvoicePrescriptions.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvInvoicePrescriptions.Columns.AddRange(new DataGridViewColumn[] { colIP_MedicineName, colIP_Unit, colIP_Quantity, colIP_UnitPrice, colIP_TotalPrice });
+            dgvInvoicePrescriptions.Dock = DockStyle.Fill;
+            dgvInvoicePrescriptions.Location = new Point(3, 3);
+            dgvInvoicePrescriptions.MultiSelect = false;
+            dgvInvoicePrescriptions.Name = "dgvInvoicePrescriptions";
+            dgvInvoicePrescriptions.ReadOnly = true;
+            dgvInvoicePrescriptions.RowHeadersVisible = false;
+            dgvInvoicePrescriptions.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgvInvoicePrescriptions.Size = new Size(461, 141);
+            dgvInvoicePrescriptions.TabIndex = 0;
+            // 
+            // colIP_MedicineName
+            // 
+            colIP_MedicineName.DataPropertyName = "MedicineName";
+            colIP_MedicineName.FillWeight = 110F;
+            colIP_MedicineName.HeaderText = "Tên thuốc";
+            colIP_MedicineName.Name = "colIP_MedicineName";
+            colIP_MedicineName.ReadOnly = true;
+            // 
+            // colIP_Unit
+            // 
+            colIP_Unit.DataPropertyName = "Unit";
+            colIP_Unit.FillWeight = 50F;
+            colIP_Unit.HeaderText = "ĐVT";
+            colIP_Unit.Name = "colIP_Unit";
+            colIP_Unit.ReadOnly = true;
+            // 
+            // colIP_Quantity
+            // 
+            colIP_Quantity.DataPropertyName = "Quantity";
+            colIP_Quantity.FillWeight = 40F;
+            colIP_Quantity.HeaderText = "SL";
+            colIP_Quantity.Name = "colIP_Quantity";
+            colIP_Quantity.ReadOnly = true;
+            // 
+            // colIP_UnitPrice
+            // 
+            colIP_UnitPrice.DataPropertyName = "UnitPrice";
+            colIP_UnitPrice.DefaultCellStyle.Format = "#,##0 đ";
+            colIP_UnitPrice.FillWeight = 70F;
+            colIP_UnitPrice.HeaderText = "Đơn giá";
+            colIP_UnitPrice.Name = "colIP_UnitPrice";
+            colIP_UnitPrice.ReadOnly = true;
+            // 
+            // colIP_TotalPrice
+            // 
+            colIP_TotalPrice.DataPropertyName = "TotalPrice";
+            colIP_TotalPrice.DefaultCellStyle.Format = "#,##0 đ";
+            colIP_TotalPrice.FillWeight = 80F;
+            colIP_TotalPrice.HeaderText = "Thành tiền";
+            colIP_TotalPrice.Name = "colIP_TotalPrice";
+            colIP_TotalPrice.ReadOnly = true;
+            // 
+            // tabPayments
+            // 
+            tabPayments.Controls.Add(dgvPayments);
+            tabPayments.Location = new Point(4, 29);
+            tabPayments.Name = "tabPayments";
+            tabPayments.Padding = new Padding(3);
+            tabPayments.Size = new Size(467, 147);
+            tabPayments.TabIndex = 2;
+            tabPayments.Text = "Lịch sử thanh toán";
+            tabPayments.UseVisualStyleBackColor = true;
+            // 
             // dgvPayments
             // 
             dgvPayments.AllowUserToAddRows = false;
-            dgvPayments.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            dgvPayments.AllowUserToDeleteRows = false;
             dgvPayments.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvPayments.BackgroundColor = Color.White;
             dgvPayments.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvPayments.Columns.AddRange(new DataGridViewColumn[] { colPayID, colPayMethod, colPayAmount, colPayDate });
-            dgvPayments.Location = new Point(15, 330);
+            dgvPayments.Dock = DockStyle.Fill;
+            dgvPayments.Location = new Point(3, 3);
             dgvPayments.MultiSelect = false;
             dgvPayments.Name = "dgvPayments";
             dgvPayments.ReadOnly = true;
             dgvPayments.RowHeadersVisible = false;
             dgvPayments.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvPayments.Size = new Size(475, 175);
+            dgvPayments.Size = new Size(461, 141);
             dgvPayments.TabIndex = 18;
             // 
             // colPayID
@@ -536,6 +716,12 @@ namespace DentalClinicManagement
             ((System.ComponentModel.ISupportInitialize)dgvInvoices).EndInit();
             grpPay.ResumeLayout(false);
             grpPay.PerformLayout();
+            tabBillingDetails.ResumeLayout(false);
+            tabServices.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)dgvInvoiceServices).EndInit();
+            tabPrescriptions.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)dgvInvoicePrescriptions).EndInit();
+            tabPayments.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)dgvPayments).EndInit();
             ((System.ComponentModel.ISupportInitialize)nudPayAmount).EndInit();
             ResumeLayout(false);
@@ -573,6 +759,21 @@ namespace DentalClinicManagement
         private Button btnPay;
         private Button btnPrintPdf;
         private Button btnExportExcel;
+        private TabControl tabBillingDetails;
+        private TabPage tabServices;
+        private DataGridView dgvInvoiceServices;
+        private DataGridViewTextBoxColumn colIS_ServiceName;
+        private DataGridViewTextBoxColumn colIS_Quantity;
+        private DataGridViewTextBoxColumn colIS_UnitPrice;
+        private DataGridViewTextBoxColumn colIS_TotalPrice;
+        private TabPage tabPrescriptions;
+        private DataGridView dgvInvoicePrescriptions;
+        private DataGridViewTextBoxColumn colIP_MedicineName;
+        private DataGridViewTextBoxColumn colIP_Unit;
+        private DataGridViewTextBoxColumn colIP_Quantity;
+        private DataGridViewTextBoxColumn colIP_UnitPrice;
+        private DataGridViewTextBoxColumn colIP_TotalPrice;
+        private TabPage tabPayments;
         private DataGridView dgvPayments;
         private DataGridViewTextBoxColumn colInvID;
         private DataGridViewTextBoxColumn colPatient;

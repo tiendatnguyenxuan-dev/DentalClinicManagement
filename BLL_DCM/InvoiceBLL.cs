@@ -40,5 +40,17 @@ namespace BLL_DCM
         }
 
         public List<PaymentDTO> GetPaymentsByInvoice(int invoiceId) => _dal.GetPaymentsByInvoice(invoiceId);
+
+        public List<InvoiceServiceDetailDTO> GetServicesByInvoice(int invoiceId)
+        {
+            if (invoiceId <= 0) return new List<InvoiceServiceDetailDTO>();
+            return _dal.GetServicesByInvoice(invoiceId);
+        }
+
+        public List<PrescriptionDetailDTO> GetPrescriptionsByInvoice(int invoiceId)
+        {
+            if (invoiceId <= 0) return new List<PrescriptionDetailDTO>();
+            return _dal.GetPrescriptionsByInvoice(invoiceId);
+        }
     }
 }

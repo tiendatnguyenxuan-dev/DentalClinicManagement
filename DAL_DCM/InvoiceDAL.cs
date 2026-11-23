@@ -180,5 +180,68 @@ namespace DAL_DCM
             }
             return list;
         }
+
+        public List<InvoiceServiceDetailDTO> GetServicesByInvoice(int invoiceId)
+        {
+            var list = new List<InvoiceServiceDetailDTO>();
+            using var conn = _db.GetConnection();
+            conn.Open();
+
+            string q = @"
+                SELECT isd.InvoiceID, isd.ServiceID, s.ServiceName, isd.Quantity, isd.UnitPrice
+                FROM InvoiceServiceDetail isd
+                INNER JOIN Service s ON isd.ServiceID = s.ServiceID
+                WHERE isd.InvoiceID = @IID";
+
+            using var cmd = new MySqlCommand(q, conn);
+            cmd.Parameters.AddWithValue("@IID", invoiceId);
+            using var r = cmd.ExecuteReader();
+            while (r.Read())
+            {
+                list.Add(new InvoiceServiceDetailDTO
+                {
+                    InvoiceID = Convert.ToInt32(r["InvoiceID"]),
+                    ServiceID = Convert.ToInt32(r["ServiceID"]),
+                    ServiceName = r["ServiceName"]?.ToString(),
+                    Quantity = Convert.ToInt32(r["Quantity"]),
+                    UnitPrice = Convert.ToDecimal(r["UnitPrice"])
+                });
+            }
+            return list;
+        }
+
+        public List<PrescriptionDetailDTO> GetPrescriptionsByInvoice(int invoiceId)
+        {
+            var list = new List<PrescriptionDetailDTO>();
+            using var conn = _db.GetConnection();
+            conn.Open();
+
+            string q = @"
+                SELECT pd.PrescriptionID, pd.MedicineID, pd.InvoiceID, pd.Quantity, pd.Dosage, pd.IsVoided,
+                       m.MedicineName, m.Unit, m.UnitPrice
+                FROM PrescriptionDetail pd
+                INNER JOIN Medicine m ON pd.MedicineID = m.MedicineID
+                WHERE pd.InvoiceID = @IID AND pd.IsVoided = 0";
+
+            using var cmd = new MySqlCommand(q, conn);
+            cmd.Parameters.AddWithValue("@IID", invoiceId);
+            using var r = cmd.ExecuteReader();
+            while (r.Read())
+            {
+                list.Add(new PrescriptionDetailDTO
+                {
+                    PrescriptionID = Convert.ToInt32(r["PrescriptionID"]),
+                    MedicineID = Convert.ToInt32(r["MedicineID"]),
+                    InvoiceID = Convert.ToInt32(r["InvoiceID"]),
+                    Quantity = Convert.ToInt32(r["Quantity"]),
+                    Dosage = r["Dosage"]?.ToString(),
+                    IsVoided = Convert.ToBoolean(r["IsVoided"]),
+                    MedicineName = r["MedicineName"]?.ToString(),
+                    Unit = r["Unit"]?.ToString(),
+                    UnitPrice = Convert.ToDecimal(r["UnitPrice"])
+                });
+            }
+            return list;
+        }
     }
 }

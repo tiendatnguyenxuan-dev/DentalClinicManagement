@@ -15,6 +15,7 @@ namespace DentalClinicManagement
         private readonly ServiceBLL _serviceBLL = new();
         private readonly MedicineBLL _medBLL = new();
         private readonly AuditLogBLL _auditBLL = new();
+        private readonly MedicalRecordBLL _medicalRecordBLL = new();
 
         private int _selectedExamId = 0;
         private int _currentPrescriptionId = 0;
@@ -230,6 +231,18 @@ namespace DentalClinicManagement
             var res = _examBLL.CreateExamination(exam);
             if (res.IsSuccess)
             {
+                // Tự động lưu/tạo hồ sơ bệnh án (MedicalRecord) cho bệnh nhân khi bác sĩ đã khám xong và lưu hồ sơ
+                try
+                {
+                    var record = _medicalRecordBLL.EnsureMedicalRecordExists(exam.PatientID);
+                    _auditBLL.Log(_currentUser?.AccountID, "INSERT", "MedicalRecord", record.MedicalRecordID, $"Tự động lập/cập nhật hồ sơ bệnh án mã {record.RecordCode} cho bệnh nhân ID={exam.PatientID}");
+                }
+                catch (Exception ex)
+                {
+                    // Không chặn luồng nếu tạo hồ sơ bệnh án gặp lỗi ngoài ý muốn
+                    Console.WriteLine("Lỗi cập nhật hồ sơ bệnh án: " + ex.Message);
+                }
+
                 _auditBLL.Log(_currentUser?.AccountID, "INSERT", "Examination", res.Data, $"Tạo hồ sơ khám bệnh #{res.Data} cho bệnh nhân ID={exam.PatientID}");
                 MessageBox.Show(res.Message, "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 LoadExaminationList();

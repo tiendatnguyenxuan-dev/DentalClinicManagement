@@ -96,8 +96,24 @@ namespace DentalClinicManagement
                 nudPayAmount.Value = Math.Max(0, inv.FinalTotal);
                 btnPay.Enabled = (inv.PaymentStatus != "Paid");
 
+                LoadInvoiceDetails();
                 LoadPayments();
             }
+        }
+
+        private void LoadInvoiceDetails()
+        {
+            if (_selectedInvoiceId <= 0) return;
+
+            // Nạp chi tiết dịch vụ
+            dgvInvoiceServices.AutoGenerateColumns = false;
+            dgvInvoiceServices.DataSource = null;
+            dgvInvoiceServices.DataSource = _invoiceBLL.GetServicesByInvoice(_selectedInvoiceId);
+
+            // Nạp chi tiết đơn thuốc
+            dgvInvoicePrescriptions.AutoGenerateColumns = false;
+            dgvInvoicePrescriptions.DataSource = null;
+            dgvInvoicePrescriptions.DataSource = _invoiceBLL.GetPrescriptionsByInvoice(_selectedInvoiceId);
         }
 
         private void LoadPayments()

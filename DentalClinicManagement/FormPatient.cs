@@ -79,6 +79,7 @@ namespace DentalClinicManagement
             btnAdd.Enabled = true;
             btnUpdate.Enabled = false;
             btnDelete.Enabled = false;
+            btnViewRecord.Enabled = false;
 
             txtFullName.Focus();
         }
@@ -111,6 +112,7 @@ namespace DentalClinicManagement
                 btnAdd.Enabled = false;
                 btnUpdate.Enabled = true;
                 btnDelete.Enabled = true;
+                btnViewRecord.Enabled = true;
             }
         }
 
@@ -240,6 +242,50 @@ namespace DentalClinicManagement
                 e.SuppressKeyPress = true;
                 btnSearch_Click(sender, e);
             }
+        }
+
+        private void btnViewRecord_Click(object sender, EventArgs e)
+        {
+            OpenMedicalRecordOfSelectedPatient();
+        }
+
+        private void dgvPatients_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0 && e.RowIndex < dgvPatients.Rows.Count)
+            {
+                if (dgvPatients.Rows[e.RowIndex].DataBoundItem is PatientDTO patient)
+                {
+                    OpenMedicalRecordOfSelectedPatient(patient.PatientID);
+                    return;
+                }
+                OpenMedicalRecordOfSelectedPatient();
+            }
+        }
+
+        private void OpenMedicalRecordOfSelectedPatient(int? specificPatientId = null)
+        {
+            int patientId = 0;
+            if (specificPatientId.HasValue && specificPatientId.Value > 0)
+            {
+                patientId = specificPatientId.Value;
+            }
+            else if (dgvPatients.CurrentRow?.DataBoundItem is PatientDTO p)
+            {
+                patientId = p.PatientID;
+            }
+            else if (int.TryParse(txtPatientId.Text, out int id) && id > 0)
+            {
+                patientId = id;
+            }
+
+            if (patientId <= 0)
+            {
+                MessageBox.Show("Vui lòng chọn một bệnh nhân từ danh sách để xem hồ sơ bệnh án!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            var formRecord = new FormMedicalRecord(patientId);
+            formRecord.ShowDialog();
         }
     }
 }

@@ -15,6 +15,24 @@ MODIFY COLUMN InvoiceID INT NULL;
 ALTER TABLE Medicine 
 ADD COLUMN IsDeleted TINYINT(1) NOT NULL DEFAULT 0;
 
+-- 3. Bảng MedicalRecord lưu hồ sơ bệnh án của từng bệnh nhân
+CREATE TABLE IF NOT EXISTS MedicalRecord (
+    MedicalRecordID INT AUTO_INCREMENT PRIMARY KEY,
+    PatientID INT NOT NULL,
+    RecordCode VARCHAR(30) NOT NULL UNIQUE,
+    CreatedDate DATE NOT NULL DEFAULT (CURRENT_DATE),
+    RecordStatus VARCHAR(20) NOT NULL DEFAULT 'Active',
+    IsDeleted BOOLEAN NOT NULL DEFAULT FALSE,
+    DeletedAt DATETIME NULL,
+
+    CONSTRAINT UQ_MedicalRecord_Patient
+        UNIQUE (PatientID),
+
+    CONSTRAINT FK_MedicalRecord_Patient
+        FOREIGN KEY (PatientID)
+        REFERENCES Patient(PatientID)
+);
+
 SELECT 'Cập nhật CSDL hoàn tất thành công!' AS ThongBao;
 
 

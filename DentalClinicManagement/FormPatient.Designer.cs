@@ -39,6 +39,7 @@ namespace DentalClinicManagement
             lblPatientId = new Label();
             pnlButtons = new Panel();
             btnClear = new Button();
+            btnViewRecord = new Button();
             btnDelete = new Button();
             btnUpdate = new Button();
             btnAdd = new Button();
@@ -256,6 +257,7 @@ namespace DentalClinicManagement
             // 
             // pnlButtons
             // 
+            pnlButtons.Controls.Add(btnViewRecord);
             pnlButtons.Controls.Add(btnClear);
             pnlButtons.Controls.Add(btnDelete);
             pnlButtons.Controls.Add(btnUpdate);
@@ -277,6 +279,20 @@ namespace DentalClinicManagement
             btnClear.Text = " Làm mới";
             btnClear.UseVisualStyleBackColor = false;
             btnClear.Click += btnClear_Click;
+            // 
+            // btnViewRecord
+            // 
+            btnViewRecord.BackColor = Color.Teal;
+            btnViewRecord.FlatStyle = FlatStyle.Flat;
+            btnViewRecord.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnViewRecord.ForeColor = Color.White;
+            btnViewRecord.Location = new Point(640, 5);
+            btnViewRecord.Name = "btnViewRecord";
+            btnViewRecord.Size = new Size(160, 35);
+            btnViewRecord.TabIndex = 4;
+            btnViewRecord.Text = " Hồ sơ bệnh án";
+            btnViewRecord.UseVisualStyleBackColor = false;
+            btnViewRecord.Click += btnViewRecord_Click;
             // 
             // btnDelete
             // 
@@ -391,6 +407,7 @@ namespace DentalClinicManagement
             dgvPatients.Size = new Size(970, 240);
             dgvPatients.TabIndex = 4;
             dgvPatients.CellClick += dgvPatients_CellClick;
+            dgvPatients.CellDoubleClick += dgvPatients_CellDoubleClick;
             // 
             // colId
             // 
@@ -516,6 +533,7 @@ namespace DentalClinicManagement
         private Button btnUpdate;
         private Button btnDelete;
         private Button btnClear;
+        private Button btnViewRecord;
         private Panel pnlSearch;
         private Label lblSearch;
         private TextBox txtSearch;

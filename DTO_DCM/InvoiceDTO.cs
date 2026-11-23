@@ -33,4 +33,14 @@ namespace DTO_DCM
         public string PaymentStatus { get; set; } = "Completed"; // 'Completed', 'Reversed'
         public int? ReversedBy { get; set; }
     }
+
+    public class InvoiceServiceDetailDTO
+    {
+        public int InvoiceID { get; set; }
+        public int ServiceID { get; set; }
+        public string? ServiceName { get; set; }
+        public int Quantity { get; set; } = 1;
+        public decimal UnitPrice { get; set; }
+        public decimal TotalPrice => Quantity * UnitPrice;
+    }
 }
