@@ -94,7 +94,7 @@ namespace DAL_DCM
             using var conn = _db.GetConnection();
             conn.Open();
 
-            string query = "SELECT * FROM Specialty WHERE IsDeleted = 0";
+            string query = "SELECT SpecialtyID, SpecialtyName FROM Specialty ORDER BY SpecialtyName";
             using var cmd = new MySqlCommand(query, conn);
             using var reader = cmd.ExecuteReader();
             while (reader.Read())
@@ -103,7 +103,7 @@ namespace DAL_DCM
                 {
                     SpecialtyID = Convert.ToInt32(reader["SpecialtyID"]),
                     SpecialtyName = reader["SpecialtyName"].ToString()!,
-                    IsDeleted = Convert.ToBoolean(reader["IsDeleted"])
+                    IsDeleted = false
                 });
             }
             return list;

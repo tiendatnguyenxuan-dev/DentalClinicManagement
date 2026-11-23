@@ -309,7 +309,7 @@ namespace DAL_DCM
                 string query = @"
             SELECT PatientID, FullName, Phone
             FROM Patient
-            WHERE IsDeleted = 0
+            WHERE PatientStatus = 'Active'
             ORDER BY FullName ASC";
 
                 using (MySqlCommand cmd = new MySqlCommand(query, conn))

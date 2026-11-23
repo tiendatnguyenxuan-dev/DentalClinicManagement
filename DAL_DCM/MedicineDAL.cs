@@ -171,9 +171,11 @@ namespace DAL_DCM
                 }
 
                 // 2. Thêm vào chi tiết đơn thuốc
+                // InvoiceID để NULL vì hóa đơn chưa tồn tại khi kê thuốc
+                // (InvoiceID sẽ được cập nhật khi xuất hóa đơn trong InvoiceDAL)
                 string query = @"
-                    INSERT INTO PrescriptionDetail (PrescriptionID, MedicineID, Quantity, Dosage, IsVoided)
-                    VALUES (@PID, @MID, @Qty, @Dosage, 0)
+                    INSERT INTO PrescriptionDetail (PrescriptionID, MedicineID, Quantity, Dosage, IsVoided, InvoiceID)
+                    VALUES (@PID, @MID, @Qty, @Dosage, 0, NULL)
                     ON DUPLICATE KEY UPDATE Quantity = Quantity + @Qty, Dosage = @Dosage;";
 
                 using (var cmd = new MySqlCommand(query, conn, tran))
