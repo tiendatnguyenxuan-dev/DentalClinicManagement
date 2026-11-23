@@ -7,10 +7,12 @@ namespace GUI_DCM
     {
         private readonly AppointmentBLL _appointmentBLL = new AppointmentBLL();
         private List<AppointmentDTO> _currentList = new List<AppointmentDTO>();
+        private readonly AccountDTO? _currentUser;
 
-        public FormAppointment()
+        public FormAppointment(AccountDTO? currentUser = null)
         {
             InitializeComponent();
+            _currentUser = currentUser;
             InitFilterControls();
             LoadAppointments();
         }
@@ -192,7 +194,7 @@ namespace GUI_DCM
             if (selected == null) return;
 
             // Mở form khám bệnh truyền lịch hẹn sang
-            var formExam = new DentalClinicManagement.FormExamination(selected);
+            var formExam = new DentalClinicManagement.FormExamination(selected, _currentUser);
             formExam.ShowDialog();
             LoadAppointments();
         }

@@ -13,7 +13,6 @@ namespace DentalClinicManagement
         public FormPatient()
         {
             InitializeComponent();
-            dtpDOB.ShowCheckBox = true;
         }
 
         private void FormPatient_Load(object sender, EventArgs e)
@@ -70,8 +69,8 @@ namespace DentalClinicManagement
             if (cboGender.Items.Count > 0)
                 cboGender.SelectedIndex = 0;
 
-            dtpDOB.Value = DateTime.Today;
-            dtpDOB.Checked = false;
+            dtpDOB.Text = "";
+            txtAllergies.Clear();
 
             txtPhone.Clear();
             txtAddress.Clear();
@@ -97,23 +96,34 @@ namespace DentalClinicManagement
 
                 if (patient.DateOfBirth.HasValue)
                 {
-                    dtpDOB.Value = patient.DateOfBirth.Value;
-                    dtpDOB.Checked = true;
+                    dtpDOB.Text = patient.DateOfBirth.Value.ToString("dd/MM/yyyy");
                 }
                 else
                 {
-                    dtpDOB.Value = DateTime.Today;
-                    dtpDOB.Checked = false;
+                    dtpDOB.Text = "";
                 }
 
                 txtPhone.Text = patient.Phone ?? "";
                 txtAddress.Text = patient.Address ?? "";
                 txtMedicalHistory.Text = patient.MedicalHistory ?? "";
+                txtAllergies.Text = patient.Allergies ?? "";
 
                 btnAdd.Enabled = false;
                 btnUpdate.Enabled = true;
                 btnDelete.Enabled = true;
             }
+        }
+
+        private DateTime? GetDOBFromInput()
+        {
+            string raw = dtpDOB.Text.Replace("_", "").Trim();
+            if (string.IsNullOrWhiteSpace(raw) || raw == "//" || raw.Length < 8)
+                return null;
+            if (DateTime.TryParseExact(dtpDOB.Text, "dd/MM/yyyy",
+                    System.Globalization.CultureInfo.InvariantCulture,
+                    System.Globalization.DateTimeStyles.None, out DateTime dob))
+                return dob;
+            return null;
         }
 
         private PatientDTO GetPatientFromForm()
@@ -122,10 +132,11 @@ namespace DentalClinicManagement
             {
                 FullName = txtFullName.Text.Trim(),
                 Gender = GetDatabaseGender(),
-                DateOfBirth = dtpDOB.Checked ? dtpDOB.Value.Date : null,
+                DateOfBirth = GetDOBFromInput(),
                 Phone = string.IsNullOrWhiteSpace(txtPhone.Text) ? null : txtPhone.Text.Trim(),
                 Address = string.IsNullOrWhiteSpace(txtAddress.Text) ? null : txtAddress.Text.Trim(),
-                MedicalHistory = string.IsNullOrWhiteSpace(txtMedicalHistory.Text) ? null : txtMedicalHistory.Text.Trim()
+                MedicalHistory = string.IsNullOrWhiteSpace(txtMedicalHistory.Text) ? null : txtMedicalHistory.Text.Trim(),
+                Allergies = string.IsNullOrWhiteSpace(txtAllergies.Text) ? null : txtAllergies.Text.Trim()
             };
         }
 

@@ -70,18 +70,18 @@ namespace DentalClinicManagement
 
                 case "RECEPTIONIST":
                     // Lễ tân tiếp đón bệnh nhân, đặt hẹn, thu ngân, lịch làm việc
+                    // Chỉ xem hồ sơ khám, không thao tác CRUD
                     btnManagePatients.Enabled = true;
                     btnAppointments.Enabled = true;
                     btnBilling.Enabled = true;
                     btnServices.Enabled = true;
                     btnWorkSchedule.Enabled = true;
                     btnReports.Enabled = false;
-                    btnExaminations.Enabled = false;
+                    btnExaminations.Enabled = true;   // Cho phép vào xem (read-only)
                     btnMedicines.Enabled = false;
                     btnEmployees.Enabled = false;
                     btnAuditLog.Enabled = false;
                     btnReports.BackColor = Color.LightGray;
-                    btnExaminations.BackColor = Color.LightGray;
                     btnMedicines.BackColor = Color.LightGray;
                     btnEmployees.BackColor = Color.LightGray;
                     btnAuditLog.BackColor = Color.LightGray;
@@ -115,7 +115,7 @@ namespace DentalClinicManagement
 
         private void btnAppointments_Click(object sender, EventArgs e)
         {
-            FormAppointment formApp = new FormAppointment();
+            FormAppointment formApp = new FormAppointment(_currentUser);
             formApp.ShowDialog();
         }
         private void btnWorkSchedule_Click(object sender, EventArgs e)
@@ -132,7 +132,7 @@ namespace DentalClinicManagement
 
         private void btnExaminations_Click(object sender, EventArgs e)
         {
-            FormExamination form = new FormExamination();
+            FormExamination form = new FormExamination(null, _currentUser);
             form.ShowDialog();
         }
 

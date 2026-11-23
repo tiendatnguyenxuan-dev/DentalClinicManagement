@@ -88,7 +88,8 @@ namespace GUI_DCM
             // 
             // dtpFromDate
             // 
-            dtpFromDate.Format = DateTimePickerFormat.Short;
+            dtpFromDate.CustomFormat = "dd/MM/yyyy";
+            dtpFromDate.Format = DateTimePickerFormat.Custom;
             dtpFromDate.Location = new Point(82, 52);
             dtpFromDate.Name = "dtpFromDate";
             dtpFromDate.ShowCheckBox = true;
@@ -106,7 +107,8 @@ namespace GUI_DCM
             // 
             // dtpToDate
             // 
-            dtpToDate.Format = DateTimePickerFormat.Short;
+            dtpToDate.CustomFormat = "dd/MM/yyyy";
+            dtpToDate.Format = DateTimePickerFormat.Custom;
             dtpToDate.Location = new Point(300, 52);
             dtpToDate.Name = "dtpToDate";
             dtpToDate.ShowCheckBox = true;

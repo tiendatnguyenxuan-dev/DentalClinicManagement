@@ -23,11 +23,13 @@ namespace DentalClinicManagement
             grpInfo = new GroupBox();
             txtMedicalHistory = new TextBox();
             lblMedicalHistory = new Label();
+            txtAllergies = new TextBox();
+            lblAllergies = new Label();
             txtAddress = new TextBox();
             lblAddress = new Label();
             txtPhone = new TextBox();
             lblPhone = new Label();
-            dtpDOB = new DateTimePicker();
+            dtpDOB = new MaskedTextBox();
             lblDOB = new Label();
             cboGender = new ComboBox();
             lblGender = new Label();
@@ -53,6 +55,7 @@ namespace DentalClinicManagement
             colPhone = new DataGridViewTextBoxColumn();
             colAddress = new DataGridViewTextBoxColumn();
             colHistory = new DataGridViewTextBoxColumn();
+            colAllergies = new DataGridViewTextBoxColumn();
             panelTop.SuspendLayout();
             grpInfo.SuspendLayout();
             pnlButtons.SuspendLayout();
@@ -83,6 +86,8 @@ namespace DentalClinicManagement
             // 
             // grpInfo
             // 
+            grpInfo.Controls.Add(txtAllergies);
+            grpInfo.Controls.Add(lblAllergies);
             grpInfo.Controls.Add(txtMedicalHistory);
             grpInfo.Controls.Add(lblMedicalHistory);
             grpInfo.Controls.Add(txtAddress);
@@ -100,7 +105,7 @@ namespace DentalClinicManagement
             grpInfo.Font = new Font("Segoe UI", 9.5F);
             grpInfo.Location = new Point(15, 60);
             grpInfo.Name = "grpInfo";
-            grpInfo.Size = new Size(970, 190);
+            grpInfo.Size = new Size(970, 220);
             grpInfo.TabIndex = 1;
             grpInfo.TabStop = false;
             grpInfo.Text = "Thông tin chi tiết bệnh nhân";
@@ -110,9 +115,9 @@ namespace DentalClinicManagement
             txtMedicalHistory.Location = new Point(620, 110);
             txtMedicalHistory.Multiline = true;
             txtMedicalHistory.Name = "txtMedicalHistory";
-            txtMedicalHistory.PlaceholderText = "Tiền sử bệnh lý, dị ứng thuốc,...";
+            txtMedicalHistory.PlaceholderText = "Tiền sử bệnh lý,...";
             txtMedicalHistory.ScrollBars = ScrollBars.Vertical;
-            txtMedicalHistory.Size = new Size(330, 65);
+            txtMedicalHistory.Size = new Size(330, 40);
             txtMedicalHistory.TabIndex = 13;
             // 
             // lblMedicalHistory
@@ -123,6 +128,23 @@ namespace DentalClinicManagement
             lblMedicalHistory.Size = new Size(100, 21);
             lblMedicalHistory.TabIndex = 12;
             lblMedicalHistory.Text = "Tiền sử bệnh:";
+            // 
+            // txtAllergies
+            // 
+            txtAllergies.Location = new Point(620, 155);
+            txtAllergies.Name = "txtAllergies";
+            txtAllergies.PlaceholderText = "Thuốc, thực phẩm bị dị ứng,...";
+            txtAllergies.Size = new Size(330, 29);
+            txtAllergies.TabIndex = 14;
+            // 
+            // lblAllergies
+            // 
+            lblAllergies.AutoSize = true;
+            lblAllergies.Location = new Point(515, 160);
+            lblAllergies.Name = "lblAllergies";
+            lblAllergies.Size = new Size(60, 21);
+            lblAllergies.TabIndex = 15;
+            lblAllergies.Text = "Dị ứng:";
             // 
             // txtAddress
             // 
@@ -160,12 +182,14 @@ namespace DentalClinicManagement
             // 
             // dtpDOB
             // 
-            dtpDOB.CustomFormat = "dd/MM/yyyy";
-            dtpDOB.Format = DateTimePickerFormat.Custom;
             dtpDOB.Location = new Point(130, 150);
+            dtpDOB.Mask = "00/00/0000";
             dtpDOB.Name = "dtpDOB";
-            dtpDOB.Size = new Size(340, 29);
+            dtpDOB.PromptChar = '_';
+            dtpDOB.Size = new Size(170, 29);
             dtpDOB.TabIndex = 7;
+            dtpDOB.ValidatingType = typeof(System.DateTime);
+            dtpDOB.Font = new Font("Segoe UI", 9.5F);
             // 
             // lblDOB
             // 
@@ -356,7 +380,7 @@ namespace DentalClinicManagement
             dgvPatients.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dgvPatients.BackgroundColor = Color.White;
             dgvPatients.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvPatients.Columns.AddRange(new DataGridViewColumn[] { colId, colName, colGender, colDOB, colPhone, colAddress, colHistory });
+            dgvPatients.Columns.AddRange(new DataGridViewColumn[] { colId, colName, colGender, colDOB, colPhone, colAddress, colHistory, colAllergies });
             dgvPatients.Location = new Point(15, 355);
             dgvPatients.MultiSelect = false;
             dgvPatients.Name = "dgvPatients";
@@ -427,11 +451,20 @@ namespace DentalClinicManagement
             // colHistory
             // 
             colHistory.DataPropertyName = "MedicalHistory";
-            colHistory.FillWeight = 120F;
+            colHistory.FillWeight = 100F;
             colHistory.HeaderText = "Tiền sử bệnh";
             colHistory.MinimumWidth = 6;
             colHistory.Name = "colHistory";
             colHistory.ReadOnly = true;
+            // 
+            // colAllergies
+            // 
+            colAllergies.DataPropertyName = "Allergies";
+            colAllergies.FillWeight = 100F;
+            colAllergies.HeaderText = "Dị ứng";
+            colAllergies.MinimumWidth = 6;
+            colAllergies.Name = "colAllergies";
+            colAllergies.ReadOnly = true;
             // 
             // FormPatient
             // 
@@ -471,7 +504,7 @@ namespace DentalClinicManagement
         private Label lblGender;
         private ComboBox cboGender;
         private Label lblDOB;
-        private DateTimePicker dtpDOB;
+        private MaskedTextBox dtpDOB;
         private TextBox txtPhone;
         private Label lblPhone;
         private TextBox txtAddress;
@@ -496,5 +529,8 @@ namespace DentalClinicManagement
         private DataGridViewTextBoxColumn colPhone;
         private DataGridViewTextBoxColumn colAddress;
         private DataGridViewTextBoxColumn colHistory;
+        private DataGridViewTextBoxColumn colAllergies;
+        private TextBox txtAllergies;
+        private Label lblAllergies;
     }
 }

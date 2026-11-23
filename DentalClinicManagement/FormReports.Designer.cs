@@ -359,7 +359,8 @@ namespace DentalClinicManagement
             // 
             // dtpToDate
             // 
-            dtpToDate.Format = DateTimePickerFormat.Short;
+            dtpToDate.CustomFormat = "dd/MM/yyyy";
+            dtpToDate.Format = DateTimePickerFormat.Custom;
             dtpToDate.Location = new Point(310, 27);
             dtpToDate.Name = "dtpToDate";
             dtpToDate.Size = new Size(140, 27);
@@ -376,7 +377,8 @@ namespace DentalClinicManagement
             // 
             // dtpFromDate
             // 
-            dtpFromDate.Format = DateTimePickerFormat.Short;
+            dtpFromDate.CustomFormat = "dd/MM/yyyy";
+            dtpFromDate.Format = DateTimePickerFormat.Custom;
             dtpFromDate.Location = new Point(85, 27);
             dtpFromDate.Name = "dtpFromDate";
             dtpFromDate.Size = new Size(130, 27);

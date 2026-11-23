@@ -209,7 +209,8 @@ namespace DentalClinicManagement
             // 
             // dtpFollowUp
             // 
-            dtpFollowUp.Format = DateTimePickerFormat.Short;
+            dtpFollowUp.CustomFormat = "dd/MM/yyyy";
+            dtpFollowUp.Format = DateTimePickerFormat.Custom;
             dtpFollowUp.Location = new Point(115, 148);
             dtpFollowUp.Name = "dtpFollowUp";
             dtpFollowUp.Size = new Size(220, 27);
