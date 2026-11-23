@@ -20,6 +20,7 @@ namespace DentalClinicManagement
         private int _selectedExamId = 0;
         private int _currentPrescriptionId = 0;
         private readonly AccountDTO? _currentUser;
+        private bool _isLoadingPatient = false;
 
         // Constructor mặc định
         public FormExamination() : this(null, null)
@@ -46,7 +47,6 @@ namespace DentalClinicManagement
         private void FormExamination_Load(object sender, EventArgs e)
         {
             LoadDropdowns();
-            LoadExaminationList();
 
             // Nếu mở từ FormAppointment
             if (this.Tag is AppointmentDTO app)
@@ -54,7 +54,28 @@ namespace DentalClinicManagement
                 cboPatient.SelectedValue = app.PatientID;
                 cboDoctor.SelectedValue = app.DoctorID;
                 txtReason.Text = app.Notes ?? "Khám theo lịch hẹn";
+                cboStatus.Text = "Draft";
                 txtDiagnosis.Focus();
+                LoadPatientHistoryAndAllergies(app.PatientID);
+
+                // Kiểm tra xem Lịch hẹn này đã có ca khám tương ứng trong CSDL chưa
+                var existingExam = _examBLL.GetByAppointmentId(app.AppointmentID);
+                if (existingExam != null)
+                {
+                    // Lịch hẹn này đã được tạo hồ sơ khám trước đó -> Load lại chi tiết ca khám để tiếp tục chỉnh sửa / xem
+                    BindExaminationDetails(existingExam);
+                }
+            }
+            else
+            {
+                if (cboPatient.SelectedValue is int pId && pId > 0)
+                {
+                    LoadPatientHistoryAndAllergies(pId);
+                }
+                else
+                {
+                    LoadExaminationList();
+                }
             }
 
             // Phân quyền: Receptionist chỉ được xem, không CRUD
@@ -62,6 +83,27 @@ namespace DentalClinicManagement
             {
                 ApplyReadOnlyMode();
             }
+        }
+
+        /// <summary>
+        /// Khóa/mở các ô nhập liệu tùy theo trạng thái xem hoặc chỉnh sửa.
+        /// </summary>
+        private void SetInputsReadOnly(bool isReadOnly)
+        {
+            txtReason.ReadOnly = isReadOnly;
+            txtDiagnosis.ReadOnly = isReadOnly;
+            txtConclusion.ReadOnly = isReadOnly;
+            txtToothNumber.ReadOnly = isReadOnly;
+            txtServiceNotes.ReadOnly = isReadOnly;
+            txtDosage.ReadOnly = isReadOnly;
+            cboPatient.Enabled = !isReadOnly;
+            cboDoctor.Enabled = !isReadOnly;
+            cboStatus.Enabled = !isReadOnly;
+            cboService.Enabled = !isReadOnly;
+            cboMedicine.Enabled = !isReadOnly;
+            nudQuantity.Enabled = !isReadOnly;
+            nudMedQty.Enabled = !isReadOnly;
+            dtpFollowUp.Enabled = !isReadOnly;
         }
 
         /// <summary>
@@ -76,6 +118,7 @@ namespace DentalClinicManagement
             btnSave.Enabled = false;
             btnUpdate.Enabled = false;
             btnReset.Enabled = false;
+            btnFinishExam.Enabled = false;
             btnAddService.Enabled = false;
             btnDeleteService.Enabled = false;
             btnAddMedicine.Enabled = false;
@@ -85,32 +128,20 @@ namespace DentalClinicManagement
             btnSave.BackColor = Color.LightGray;
             btnUpdate.BackColor = Color.LightGray;
             btnReset.BackColor = Color.LightGray;
+            btnFinishExam.BackColor = Color.LightGray;
             btnAddService.BackColor = Color.LightGray;
             btnDeleteService.BackColor = Color.LightGray;
             btnAddMedicine.BackColor = Color.LightGray;
             btnDeleteMed.BackColor = Color.LightGray;
 
-            // Khóa các ô nhập liệu
-            txtReason.ReadOnly = true;
-            txtDiagnosis.ReadOnly = true;
-            txtConclusion.ReadOnly = true;
-            txtToothNumber.ReadOnly = true;
-            txtServiceNotes.ReadOnly = true;
-            txtDosage.ReadOnly = true;
-            cboPatient.Enabled = false;
-            cboDoctor.Enabled = false;
-            cboStatus.Enabled = false;
-            cboService.Enabled = false;
-            cboMedicine.Enabled = false;
-            nudQuantity.Enabled = false;
-            nudMedQty.Enabled = false;
-            dtpFollowUp.Enabled = false;
+            SetInputsReadOnly(true);
         }
 
         private void LoadDropdowns()
         {
             try
             {
+                _isLoadingPatient = true;
                 var patients = _patientBLL.GetAllPatients();
                 cboPatient.DataSource = patients;
                 cboPatient.DisplayMember = "FullName";
@@ -135,6 +166,57 @@ namespace DentalClinicManagement
             {
                 MessageBox.Show("Lỗi tải danh mục: " + ex.Message);
             }
+            finally
+            {
+                _isLoadingPatient = false;
+            }
+        }
+
+        private void cboPatient_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (_isLoadingPatient) return;
+            if (cboPatient.SelectedValue is int patientId && patientId > 0)
+            {
+                LoadPatientHistoryAndAllergies(patientId);
+            }
+        }
+
+        private void LoadPatientHistoryAndAllergies(int patientId)
+        {
+            try
+            {
+                // 1. Hiển thị thông tin dị ứng & tiền sử bệnh của bệnh nhân
+                var patient = _patientBLL.GetPatientById(patientId);
+                if (patient != null)
+                {
+                    string allergyText = string.IsNullOrWhiteSpace(patient.Allergies) ? "Không ghi nhận" : patient.Allergies;
+                    lblPatientAllergies.Text = $"[Dị ứng: {allergyText}]";
+
+                    // Cảnh báo màu đỏ nổi bật nếu có dị ứng
+                    if (!string.IsNullOrWhiteSpace(patient.Allergies) && !patient.Allergies.Equals("Không có", StringComparison.OrdinalIgnoreCase))
+                    {
+                        lblPatientAllergies.ForeColor = Color.Red;
+                    }
+                    else
+                    {
+                        lblPatientAllergies.ForeColor = Color.DimGray;
+                    }
+                }
+                else
+                {
+                    lblPatientAllergies.Text = "";
+                }
+
+                // 2. Tải lịch sử các lần khám trước đây của riêng bệnh nhân này
+                var examList = _medicalRecordBLL.GetExaminationsByPatientId(patientId);
+                dgvExaminations.AutoGenerateColumns = false;
+                dgvExaminations.DataSource = null;
+                dgvExaminations.DataSource = examList;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi tải lịch sử khám bệnh nhân: " + ex.Message);
+            }
         }
 
         private void LoadExaminationList()
@@ -151,31 +233,44 @@ namespace DentalClinicManagement
             }
         }
 
+        private void BindExaminationDetails(ExaminationDTO exam)
+        {
+            _selectedExamId = exam.ExaminationID;
+            txtExamID.Text = exam.ExaminationID.ToString();
+            cboPatient.SelectedValue = exam.PatientID;
+            cboDoctor.SelectedValue = exam.DoctorID;
+            txtReason.Text = exam.ExaminationReason ?? "";
+            txtDiagnosis.Text = exam.Diagnosis ?? "";
+            txtConclusion.Text = exam.Conclusion ?? "";
+            dtpFollowUp.Value = exam.FollowUpDate ?? DateTime.Today.AddDays(7);
+            cboStatus.Text = exam.ExaminationStatus;
+
+            // Chỉ enable các nút nếu không phải chế độ chỉ xem và ca khám chưa bị chốt (Finalized)
+            bool isReadOnly = IsReadOnlyUser();
+            bool isFinalized = string.Equals(exam.ExaminationStatus, "Finalized", StringComparison.OrdinalIgnoreCase);
+            bool canEdit = !isReadOnly && !isFinalized;
+
+            btnUpdate.Enabled = canEdit;
+            btnAddService.Enabled = canEdit;
+            btnAddMedicine.Enabled = canEdit;
+            btnDeleteService.Enabled = canEdit;
+            btnDeleteMed.Enabled = canEdit;
+            btnSave.Enabled = !isReadOnly && !isFinalized;
+            btnFinishExam.Enabled = !isReadOnly && !isFinalized;
+
+            // Khóa/mở ô nhập liệu dựa trên trạng thái ca khám
+            SetInputsReadOnly(!canEdit);
+
+            LoadExamServices();
+            LoadPrescription();
+        }
+
         private void dgvExaminations_CellClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex < 0 || e.RowIndex >= dgvExaminations.Rows.Count) return;
             if (dgvExaminations.Rows[e.RowIndex].DataBoundItem is ExaminationDTO exam)
             {
-                _selectedExamId = exam.ExaminationID;
-                txtExamID.Text = exam.ExaminationID.ToString();
-                cboPatient.SelectedValue = exam.PatientID;
-                cboDoctor.SelectedValue = exam.DoctorID;
-                txtReason.Text = exam.ExaminationReason ?? "";
-                txtDiagnosis.Text = exam.Diagnosis ?? "";
-                txtConclusion.Text = exam.Conclusion ?? "";
-                dtpFollowUp.Value = exam.FollowUpDate ?? DateTime.Today.AddDays(7);
-                cboStatus.Text = exam.ExaminationStatus;
-
-                // Chỉ enable các nút nếu không phải chế độ chỉ xem
-                bool isReadOnly = IsReadOnlyUser();
-                btnUpdate.Enabled = !isReadOnly;
-                btnAddService.Enabled = !isReadOnly;
-                btnAddMedicine.Enabled = !isReadOnly;
-                btnDeleteService.Enabled = !isReadOnly;
-                btnDeleteMed.Enabled = !isReadOnly;
-
-                LoadExamServices();
-                LoadPrescription();
+                BindExaminationDetails(exam);
             }
         }
 
@@ -215,6 +310,18 @@ namespace DentalClinicManagement
 
             int? apptId = (this.Tag is AppointmentDTO a) ? a.AppointmentID : null;
 
+            // Nếu lịch hẹn này đã có ca khám trước đó, chuyển sang chế độ cập nhật thay vì tạo trùng
+            if (apptId.HasValue && apptId.Value > 0)
+            {
+                var existingExam = _examBLL.GetByAppointmentId(apptId.Value);
+                if (existingExam != null)
+                {
+                    _selectedExamId = existingExam.ExaminationID;
+                    btnUpdate_Click(sender, e);
+                    return;
+                }
+            }
+
             var exam = new ExaminationDTO
             {
                 PatientID = Convert.ToInt32(cboPatient.SelectedValue),
@@ -245,8 +352,20 @@ namespace DentalClinicManagement
 
                 _auditBLL.Log(_currentUser?.AccountID, "INSERT", "Examination", res.Data, $"Tạo hồ sơ khám bệnh #{res.Data} cho bệnh nhân ID={exam.PatientID}");
                 MessageBox.Show(res.Message, "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                LoadExaminationList();
-                ResetForm();
+                
+                // Giữ lại ca khám vừa tạo để bác sĩ tiếp tục chỉ định Dịch vụ & Kê đơn thuốc
+                _selectedExamId = res.Data;
+                txtExamID.Text = _selectedExamId.ToString();
+                btnUpdate.Enabled = true;
+                btnFinishExam.Enabled = true;
+                btnAddService.Enabled = true;
+                btnAddMedicine.Enabled = true;
+                btnDeleteService.Enabled = true;
+                btnDeleteMed.Enabled = true;
+
+                LoadPatientHistoryAndAllergies(exam.PatientID);
+                LoadExamServices();
+                LoadPrescription();
             }
             else
             {
@@ -280,7 +399,7 @@ namespace DentalClinicManagement
             {
                 _auditBLL.Log(_currentUser?.AccountID, "UPDATE", "Examination", _selectedExamId, $"Cập nhật chẩn đoán/kết luận ca khám #{_selectedExamId}");
                 MessageBox.Show(res.Message, "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                LoadExaminationList();
+                LoadPatientHistoryAndAllergies(exam.PatientID);
             }
             else
             {
@@ -290,9 +409,9 @@ namespace DentalClinicManagement
 
         private void btnAddService_Click(object sender, EventArgs e)
         {
-            if (IsReadOnlyUser())
+            if (IsReadOnlyUser() || string.Equals(cboStatus.Text, "Finalized", StringComparison.OrdinalIgnoreCase))
             {
-                MessageBox.Show("Tài khoản Lễ tân chỉ có quyền xem, không được thêm dịch vụ!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Ca khám đã chốt (Finalized) hoặc bạn không có quyền thêm dịch vụ!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -331,9 +450,9 @@ namespace DentalClinicManagement
 
         private void btnDeleteService_Click(object sender, EventArgs e)
         {
-            if (IsReadOnlyUser())
+            if (IsReadOnlyUser() || string.Equals(cboStatus.Text, "Finalized", StringComparison.OrdinalIgnoreCase))
             {
-                MessageBox.Show("Tài khoản Lễ tân chỉ có quyền xem, không được xóa dịch vụ!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Ca khám đã chốt (Finalized) hoặc bạn không có quyền xóa dịch vụ!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -349,9 +468,9 @@ namespace DentalClinicManagement
 
         private void btnAddMedicine_Click(object sender, EventArgs e)
         {
-            if (IsReadOnlyUser())
+            if (IsReadOnlyUser() || string.Equals(cboStatus.Text, "Finalized", StringComparison.OrdinalIgnoreCase))
             {
-                MessageBox.Show("Tài khoản Lễ tân chỉ có quyền xem, không được kê đơn thuốc!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Ca khám đã chốt (Finalized) hoặc bạn không có quyền kê đơn thuốc!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -409,9 +528,9 @@ namespace DentalClinicManagement
 
         private void btnDeleteMed_Click(object sender, EventArgs e)
         {
-            if (IsReadOnlyUser())
+            if (IsReadOnlyUser() || string.Equals(cboStatus.Text, "Finalized", StringComparison.OrdinalIgnoreCase))
             {
-                MessageBox.Show("Tài khoản Lễ tân chỉ có quyền xem, không được xóa thuốc khỏi đơn!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Ca khám đã chốt (Finalized) hoặc bạn không có quyền xóa thuốc khỏi đơn!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -425,6 +544,66 @@ namespace DentalClinicManagement
             }
         }
 
+        private void btnFinishExam_Click(object sender, EventArgs e)
+        {
+            if (IsReadOnlyUser())
+            {
+                MessageBox.Show("Tài khoản Lễ tân chỉ có quyền xem, không được chốt ca khám!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (_selectedExamId <= 0)
+            {
+                MessageBox.Show("Vui lòng lưu hồ sơ khám trước khi chốt ca khám!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            var confirm = MessageBox.Show(
+                "Bạn có chắc chắn muốn chốt ca khám này (Đã khám xong)?\n\nSau khi chốt, ca khám sẽ chuyển sang trạng thái 'Finalized' và khóa chỉnh sửa dịch vụ/đơn thuốc để chuyển sang Thu ngân.",
+                "Xác nhận hoàn tất ca khám",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question);
+
+            if (confirm != DialogResult.Yes) return;
+
+            cboStatus.Text = "Finalized";
+
+            var exam = new ExaminationDTO
+            {
+                ExaminationID = _selectedExamId,
+                PatientID = Convert.ToInt32(cboPatient.SelectedValue),
+                DoctorID = Convert.ToInt32(cboDoctor.SelectedValue),
+                ExaminationReason = txtReason.Text.Trim(),
+                Diagnosis = txtDiagnosis.Text.Trim(),
+                Conclusion = txtConclusion.Text.Trim(),
+                FollowUpDate = dtpFollowUp.Value,
+                ExaminationStatus = "Finalized"
+            };
+
+            var res = _examBLL.UpdateExamination(exam);
+            if (res.IsSuccess)
+            {
+                _auditBLL.Log(_currentUser?.AccountID, "UPDATE", "Examination", _selectedExamId, $"Bác sĩ hoàn tất khám (Finalized) cho ca khám #{_selectedExamId}");
+                MessageBox.Show("Đã hoàn tất ca khám và chuyển trạng thái sang Finalized!", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                // Khóa form ca khám này
+                btnUpdate.Enabled = false;
+                btnFinishExam.Enabled = false;
+                btnAddService.Enabled = false;
+                btnAddMedicine.Enabled = false;
+                btnDeleteService.Enabled = false;
+                btnDeleteMed.Enabled = false;
+                btnSave.Enabled = false;
+                SetInputsReadOnly(true);
+
+                LoadPatientHistoryAndAllergies(exam.PatientID);
+            }
+            else
+            {
+                MessageBox.Show("Lỗi khi chốt ca khám: " + res.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
         private void btnReset_Click(object sender, EventArgs e)
         {
             ResetForm();
@@ -435,18 +614,28 @@ namespace DentalClinicManagement
             _selectedExamId = 0;
             _currentPrescriptionId = 0;
             txtExamID.Text = "(Tự động)";
+            cboStatus.Text = "Draft";
             txtReason.Clear();
             txtDiagnosis.Clear();
             txtConclusion.Clear();
             btnUpdate.Enabled = false;
+            btnFinishExam.Enabled = false;
             btnAddService.Enabled = false;
             btnAddMedicine.Enabled = false;
+            btnDeleteService.Enabled = false;
+            btnDeleteMed.Enabled = false;
+
             if (IsReadOnlyUser())
             {
                 btnSave.Enabled = false;
-                btnDeleteService.Enabled = false;
-                btnDeleteMed.Enabled = false;
+                SetInputsReadOnly(true);
             }
+            else
+            {
+                btnSave.Enabled = true;
+                SetInputsReadOnly(false);
+            }
+
             dgvExamServices.DataSource = null;
             dgvPrescription.DataSource = null;
         }

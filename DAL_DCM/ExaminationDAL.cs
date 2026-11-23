@@ -9,6 +9,44 @@ namespace DAL_DCM
     {
         private readonly DbConnection _db = new();
 
+        public ExaminationDTO? GetByAppointmentId(int appointmentId)
+        {
+            using var conn = _db.GetConnection();
+            conn.Open();
+
+            string query = @"
+                SELECT e.*, p.FullName AS PatientName, p.Phone AS PatientPhone, doc.FullName AS DoctorName
+                FROM Examination e
+                INNER JOIN Patient p ON e.PatientID = p.PatientID
+                INNER JOIN Employee doc ON e.DoctorID = doc.EmployeeID
+                WHERE e.AppointmentID = @AppointmentID
+                LIMIT 1";
+
+            using var cmd = new MySqlCommand(query, conn);
+            cmd.Parameters.AddWithValue("@AppointmentID", appointmentId);
+            using var reader = cmd.ExecuteReader();
+            if (reader.Read())
+            {
+                return new ExaminationDTO
+                {
+                    ExaminationID = Convert.ToInt32(reader["ExaminationID"]),
+                    PatientID = Convert.ToInt32(reader["PatientID"]),
+                    DoctorID = Convert.ToInt32(reader["DoctorID"]),
+                    AppointmentID = reader["AppointmentID"] != DBNull.Value ? Convert.ToInt32(reader["AppointmentID"]) : null,
+                    ExaminationDate = Convert.ToDateTime(reader["ExaminationDate"]),
+                    ExaminationReason = reader["ExaminationReason"]?.ToString(),
+                    Diagnosis = reader["Diagnosis"]?.ToString(),
+                    Conclusion = reader["Conclusion"]?.ToString(),
+                    FollowUpDate = reader["FollowUpDate"] != DBNull.Value ? Convert.ToDateTime(reader["FollowUpDate"]) : null,
+                    ExaminationStatus = reader["ExaminationStatus"].ToString() ?? "Draft",
+                    PatientName = reader["PatientName"]?.ToString(),
+                    PatientPhone = reader["PatientPhone"]?.ToString(),
+                    DoctorName = reader["DoctorName"]?.ToString()
+                };
+            }
+            return null;
+        }
+
         public List<ExaminationDTO> GetAllExaminations()
         {
             var list = new List<ExaminationDTO>();

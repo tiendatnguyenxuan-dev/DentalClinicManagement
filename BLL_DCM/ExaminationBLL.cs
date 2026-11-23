@@ -11,6 +11,8 @@ namespace BLL_DCM
 
         public List<ExaminationDTO> GetAllExaminations() => _dal.GetAllExaminations();
 
+        public ExaminationDTO? GetByAppointmentId(int appointmentId) => _dal.GetByAppointmentId(appointmentId);
+
         public OperationResult<int> CreateExamination(ExaminationDTO exam)
         {
             if (exam.PatientID <= 0) return OperationResult<int>.Failure("Vui lòng chọn bệnh nhân!");

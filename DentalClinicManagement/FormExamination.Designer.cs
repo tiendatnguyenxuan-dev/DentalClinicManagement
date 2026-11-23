@@ -20,6 +20,7 @@ namespace DentalClinicManagement
             lblTitle = new Label();
             grpExam = new GroupBox();
             btnReset = new Button();
+            btnFinishExam = new Button();
             btnUpdate = new Button();
             btnSave = new Button();
             cboStatus = new ComboBox();
@@ -36,6 +37,7 @@ namespace DentalClinicManagement
             lblDoctor = new Label();
             cboPatient = new ComboBox();
             lblPatient = new Label();
+            lblPatientAllergies = new Label();
             txtExamID = new TextBox();
             lblExamID = new Label();
             splitContainer = new SplitContainer();
@@ -124,6 +126,7 @@ namespace DentalClinicManagement
             // grpExam
             // 
             grpExam.Controls.Add(btnReset);
+            grpExam.Controls.Add(btnFinishExam);
             grpExam.Controls.Add(btnUpdate);
             grpExam.Controls.Add(btnSave);
             grpExam.Controls.Add(cboStatus);
@@ -140,6 +143,7 @@ namespace DentalClinicManagement
             grpExam.Controls.Add(lblDoctor);
             grpExam.Controls.Add(cboPatient);
             grpExam.Controls.Add(lblPatient);
+            grpExam.Controls.Add(lblPatientAllergies);
             grpExam.Controls.Add(txtExamID);
             grpExam.Controls.Add(lblExamID);
             grpExam.Dock = DockStyle.Top;
@@ -151,13 +155,27 @@ namespace DentalClinicManagement
             grpExam.TabStop = false;
             grpExam.Text = "Thông tin phiếu khám";
             // 
+            // btnFinishExam
+            // 
+            btnFinishExam.BackColor = Color.Crimson;
+            btnFinishExam.Enabled = false;
+            btnFinishExam.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnFinishExam.ForeColor = Color.White;
+            btnFinishExam.Location = new Point(1095, 145);
+            btnFinishExam.Name = "btnFinishExam";
+            btnFinishExam.Size = new Size(125, 36);
+            btnFinishExam.TabIndex = 19;
+            btnFinishExam.Text = "Đã khám";
+            btnFinishExam.UseVisualStyleBackColor = false;
+            btnFinishExam.Click += btnFinishExam_Click;
+            // 
             // btnReset
             // 
             btnReset.BackColor = Color.LightSlateGray;
             btnReset.ForeColor = Color.White;
-            btnReset.Location = new Point(1080, 145);
+            btnReset.Location = new Point(975, 145);
             btnReset.Name = "btnReset";
-            btnReset.Size = new Size(130, 36);
+            btnReset.Size = new Size(110, 36);
             btnReset.TabIndex = 18;
             btnReset.Text = "Làm mới";
             btnReset.UseVisualStyleBackColor = false;
@@ -168,9 +186,9 @@ namespace DentalClinicManagement
             btnUpdate.BackColor = Color.DarkOrange;
             btnUpdate.Enabled = false;
             btnUpdate.ForeColor = Color.White;
-            btnUpdate.Location = new Point(940, 145);
+            btnUpdate.Location = new Point(855, 145);
             btnUpdate.Name = "btnUpdate";
-            btnUpdate.Size = new Size(130, 36);
+            btnUpdate.Size = new Size(110, 36);
             btnUpdate.TabIndex = 17;
             btnUpdate.Text = "Cập nhật";
             btnUpdate.UseVisualStyleBackColor = false;
@@ -180,9 +198,9 @@ namespace DentalClinicManagement
             // 
             btnSave.BackColor = Color.ForestGreen;
             btnSave.ForeColor = Color.White;
-            btnSave.Location = new Point(800, 145);
+            btnSave.Location = new Point(735, 145);
             btnSave.Name = "btnSave";
-            btnSave.Size = new Size(130, 36);
+            btnSave.Size = new Size(110, 36);
             btnSave.TabIndex = 16;
             btnSave.Text = "Lưu hồ sơ";
             btnSave.UseVisualStyleBackColor = false;
@@ -277,41 +295,52 @@ namespace DentalClinicManagement
             lblReason.TabIndex = 6;
             lblReason.Text = "Lý do khám:";
             // 
+            // cboPatient
+            // 
+            cboPatient.DropDownStyle = ComboBoxStyle.DropDownList;
+            cboPatient.FormattingEnabled = true;
+            cboPatient.Location = new Point(160, 27);
+            cboPatient.Name = "cboPatient";
+            cboPatient.Size = new Size(160, 28);
+            cboPatient.TabIndex = 3;
+            cboPatient.SelectedIndexChanged += cboPatient_SelectedIndexChanged;
+            // 
+            // lblPatient
+            // 
+            lblPatient.AutoSize = true;
+            lblPatient.Location = new Point(80, 30);
+            lblPatient.Name = "lblPatient";
+            lblPatient.Size = new Size(82, 20);
+            lblPatient.TabIndex = 2;
+            lblPatient.Text = "Bệnh nhân:";
+            // 
+            // lblPatientAllergies
+            // 
+            lblPatientAllergies.AutoSize = true;
+            lblPatientAllergies.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblPatientAllergies.ForeColor = Color.Crimson;
+            lblPatientAllergies.Location = new Point(325, 30);
+            lblPatientAllergies.Name = "lblPatientAllergies";
+            lblPatientAllergies.Size = new Size(0, 20);
+            lblPatientAllergies.TabIndex = 19;
+            // 
             // cboDoctor
             // 
             cboDoctor.DropDownStyle = ComboBoxStyle.DropDownList;
             cboDoctor.FormattingEnabled = true;
-            cboDoctor.Location = new Point(480, 27);
+            cboDoctor.Location = new Point(540, 27);
             cboDoctor.Name = "cboDoctor";
-            cboDoctor.Size = new Size(200, 28);
+            cboDoctor.Size = new Size(150, 28);
             cboDoctor.TabIndex = 5;
             // 
             // lblDoctor
             // 
             lblDoctor.AutoSize = true;
-            lblDoctor.Location = new Point(390, 30);
+            lblDoctor.Location = new Point(485, 30);
             lblDoctor.Name = "lblDoctor";
             lblDoctor.Size = new Size(54, 20);
             lblDoctor.TabIndex = 4;
             lblDoctor.Text = "Bác sĩ:";
-            // 
-            // cboPatient
-            // 
-            cboPatient.DropDownStyle = ComboBoxStyle.DropDownList;
-            cboPatient.FormattingEnabled = true;
-            cboPatient.Location = new Point(170, 27);
-            cboPatient.Name = "cboPatient";
-            cboPatient.Size = new Size(180, 28);
-            cboPatient.TabIndex = 3;
-            // 
-            // lblPatient
-            // 
-            lblPatient.AutoSize = true;
-            lblPatient.Location = new Point(90, 30);
-            lblPatient.Name = "lblPatient";
-            lblPatient.Size = new Size(82, 20);
-            lblPatient.TabIndex = 2;
-            lblPatient.Text = "Bệnh nhân:";
             // 
             // txtExamID
             // 
@@ -818,6 +847,7 @@ namespace DentalClinicManagement
         private Label lblExamID;
         private TextBox txtExamID;
         private Label lblPatient;
+        private Label lblPatientAllergies;
         private ComboBox cboPatient;
         private Label lblDoctor;
         private ComboBox cboDoctor;
@@ -834,6 +864,7 @@ namespace DentalClinicManagement
         private Button btnSave;
         private Button btnUpdate;
         private Button btnReset;
+        private Button btnFinishExam;
         private SplitContainer splitContainer;
         private DataGridView dgvExaminations;
         private TabControl tabDetails;
