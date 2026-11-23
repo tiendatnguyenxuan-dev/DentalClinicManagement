@@ -157,6 +157,55 @@ namespace DAL_DCM
             return list;
         }
 
+        public List<DailyRevenueDetailDTO> GetDailyRevenueDetails(DateTime targetDate)
+        {
+            var list = new List<DailyRevenueDetailDTO>();
+            using var conn = _db.GetConnection();
+            conn.Open();
+
+            string query = @"
+                SELECT 
+                    i.InvoiceID,
+                    i.ExaminationID,
+                    i.InvoiceDate,
+                    p.FullName AS PatientName,
+                    doc.FullName AS DoctorName,
+                    ex.Diagnosis,
+                    i.TotalAmountService,
+                    i.TotalAmountMedicine,
+                    i.DiscountAmount,
+                    i.PaymentStatus
+                FROM Invoice i
+                INNER JOIN Examination ex ON i.ExaminationID = ex.ExaminationID
+                INNER JOIN Patient p ON ex.PatientID = p.PatientID
+                INNER JOIN Employee doc ON ex.DoctorID = doc.EmployeeID
+                WHERE DATE(i.InvoiceDate) = @TargetDate
+                  AND i.InvoiceStatus = 'Issued'
+                ORDER BY i.InvoiceDate ASC";
+
+            using var cmd = new MySqlCommand(query, conn);
+            cmd.Parameters.AddWithValue("@TargetDate", targetDate.Date);
+
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                list.Add(new DailyRevenueDetailDTO
+                {
+                    InvoiceID = Convert.ToInt32(reader["InvoiceID"]),
+                    ExaminationID = Convert.ToInt32(reader["ExaminationID"]),
+                    InvoiceDate = Convert.ToDateTime(reader["InvoiceDate"]),
+                    PatientName = reader["PatientName"]?.ToString(),
+                    DoctorName = reader["DoctorName"]?.ToString(),
+                    Diagnosis = reader["Diagnosis"]?.ToString(),
+                    TotalAmountService = Convert.ToDecimal(reader["TotalAmountService"]),
+                    TotalAmountMedicine = Convert.ToDecimal(reader["TotalAmountMedicine"]),
+                    DiscountAmount = Convert.ToDecimal(reader["DiscountAmount"]),
+                    PaymentStatus = reader["PaymentStatus"]?.ToString() ?? "Unpaid"
+                });
+            }
+            return list;
+        }
+
         public (decimal TotalRevenue, int TotalExams, int TotalPatients, int TotalAppointments) GetDashboardSummary()
         {
             using var conn = _db.GetConnection();

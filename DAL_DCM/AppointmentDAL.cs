@@ -34,7 +34,20 @@ namespace DAL_DCM
                     INNER JOIN Patient p ON a.PatientID = p.PatientID
                     INNER JOIN Employee e ON a.DoctorID = e.EmployeeID
                     LEFT JOIN Specialty s ON e.SpecialtyID = s.SpecialtyID
-                    ORDER BY a.AppointmentDateTime DESC";
+                    ORDER BY 
+                        CASE 
+                            WHEN a.AppointmentStatus IN ('Pending', 'Confirmed') THEN 1 
+                            ELSE 2 
+                        END ASC,
+                        CASE 
+                            WHEN a.AppointmentDateTime >= NOW() THEN 0 
+                            ELSE 1 
+                        END ASC,
+                        CASE 
+                            WHEN a.AppointmentDateTime >= NOW() THEN a.AppointmentDateTime 
+                            ELSE NULL 
+                        END ASC,
+                        a.AppointmentDateTime DESC";
 
                 using (MySqlCommand cmd = new MySqlCommand(query, conn))
                 {
@@ -90,7 +103,20 @@ namespace DAL_DCM
                 if (!string.IsNullOrWhiteSpace(keyword))
                     query += " AND (p.FullName LIKE @keyword OR p.Phone LIKE @keyword)";
 
-                query += " ORDER BY a.AppointmentDateTime DESC";
+                query += @" ORDER BY 
+                            CASE 
+                                WHEN a.AppointmentStatus IN ('Pending', 'Confirmed') THEN 1 
+                                ELSE 2 
+                            END ASC,
+                            CASE 
+                                WHEN a.AppointmentDateTime >= NOW() THEN 0 
+                                ELSE 1 
+                            END ASC,
+                            CASE 
+                                WHEN a.AppointmentDateTime >= NOW() THEN a.AppointmentDateTime 
+                                ELSE NULL 
+                            END ASC,
+                            a.AppointmentDateTime DESC";
 
                 using (MySqlCommand cmd = new MySqlCommand(query, conn))
                 {

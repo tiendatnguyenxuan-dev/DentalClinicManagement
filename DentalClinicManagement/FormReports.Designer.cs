@@ -268,6 +268,7 @@ namespace DentalClinicManagement
             dgvRevenue.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dgvRevenue.Size = new Size(1086, 396);
             dgvRevenue.TabIndex = 4;
+            dgvRevenue.CellDoubleClick += dgvRevenue_CellDoubleClick;
             // 
             // colDate
             // 

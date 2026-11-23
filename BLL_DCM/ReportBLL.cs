@@ -22,5 +22,10 @@ namespace BLL_DCM
         {
             return _dal.GetDashboardSummary();
         }
+
+        public List<DailyRevenueDetailDTO> GetDailyRevenueDetails(DateTime targetDate)
+        {
+            return _dal.GetDailyRevenueDetails(targetDate);
+        }
     }
 }

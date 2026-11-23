@@ -103,5 +103,21 @@ namespace DentalClinicManagement
         {
             LoadQuarterMatrix();
         }
+
+        private void dgvRevenue_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0 || e.RowIndex >= dgvRevenue.Rows.Count) return;
+
+            if (dgvRevenue.Rows[e.RowIndex].DataBoundItem is RevenueReportDTO item)
+            {
+                if (DateTime.TryParseExact(item.TimeLabel, "dd/MM/yyyy", 
+                    System.Globalization.CultureInfo.InvariantCulture, 
+                    System.Globalization.DateTimeStyles.None, out DateTime targetDate))
+                {
+                    using var frm = new FormDailyRevenueDetail(targetDate);
+                    frm.ShowDialog(this);
+                }
+            }
+        }
     }
 }

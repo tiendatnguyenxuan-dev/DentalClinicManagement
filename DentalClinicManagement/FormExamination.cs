@@ -16,6 +16,7 @@ namespace DentalClinicManagement
         private readonly MedicineBLL _medBLL = new();
         private readonly AuditLogBLL _auditBLL = new();
         private readonly MedicalRecordBLL _medicalRecordBLL = new();
+        private readonly AppointmentBLL _appointmentBLL = new();
 
         private int _selectedExamId = 0;
         private int _currentPrescriptionId = 0;
@@ -48,7 +49,7 @@ namespace DentalClinicManagement
         {
             LoadDropdowns();
 
-            // Nếu mở từ FormAppointment
+            // Nếu mở từ FormAppointment (có ca hẹn cụ thể)
             if (this.Tag is AppointmentDTO app)
             {
                 cboPatient.SelectedValue = app.PatientID;
@@ -65,6 +66,11 @@ namespace DentalClinicManagement
                     // Lịch hẹn này đã được tạo hồ sơ khám trước đó -> Load lại chi tiết ca khám để tiếp tục chỉnh sửa / xem
                     BindExaminationDetails(existingExam);
                 }
+            }
+            else if (IsReadOnlyUser())
+            {
+                // Đối với Lễ tân (chế độ chỉ xem từ menu): Luôn tải toàn bộ danh sách ca khám của phòng khám để xem/tra cứu
+                LoadExaminationList();
             }
             else
             {
@@ -175,6 +181,9 @@ namespace DentalClinicManagement
         private void cboPatient_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (_isLoadingPatient) return;
+            // Nếu là Lễ tân (chế độ chỉ xem tổng thể), không tự động lọc bảng theo dropdown bệnh nhân trừ khi được chỉ định
+            if (IsReadOnlyUser()) return;
+
             if (cboPatient.SelectedValue is int patientId && patientId > 0)
             {
                 LoadPatientHistoryAndAllergies(patientId);
@@ -583,6 +592,19 @@ namespace DentalClinicManagement
             var res = _examBLL.UpdateExamination(exam);
             if (res.IsSuccess)
             {
+                // Tự động chuyển trạng thái lịch hẹn tương ứng sang 'Completed'
+                if (this.Tag is AppointmentDTO app && app.AppointmentID > 0)
+                {
+                    try
+                    {
+                        _appointmentBLL.UpdateStatus(app.AppointmentID, "Completed");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Lỗi cập nhật trạng thái lịch hẹn: " + ex.Message);
+                    }
+                }
+
                 _auditBLL.Log(_currentUser?.AccountID, "UPDATE", "Examination", _selectedExamId, $"Bác sĩ hoàn tất khám (Finalized) cho ca khám #{_selectedExamId}");
                 MessageBox.Show("Đã hoàn tất ca khám và chuyển trạng thái sang Finalized!", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
