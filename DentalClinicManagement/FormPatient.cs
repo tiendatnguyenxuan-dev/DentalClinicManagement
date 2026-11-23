@@ -75,8 +75,10 @@ namespace DentalClinicManagement
             txtPhone.Clear();
             txtAddress.Clear();
             txtMedicalHistory.Clear();
+            txtInitialReason.Clear();
 
             btnAdd.Enabled = true;
+            btnRegisterAndQueue.Enabled = true;
             btnUpdate.Enabled = false;
             btnDelete.Enabled = false;
             btnViewRecord.Enabled = false;
@@ -108,8 +110,10 @@ namespace DentalClinicManagement
                 txtAddress.Text = patient.Address ?? "";
                 txtMedicalHistory.Text = patient.MedicalHistory ?? "";
                 txtAllergies.Text = patient.Allergies ?? "";
+                txtInitialReason.Clear();
 
                 btnAdd.Enabled = false;
+                btnRegisterAndQueue.Enabled = false;
                 btnUpdate.Enabled = true;
                 btnDelete.Enabled = true;
                 btnViewRecord.Enabled = true;
@@ -150,6 +154,30 @@ namespace DentalClinicManagement
             if (isSuccess)
             {
                 MessageBox.Show(message, "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                LoadPatientList();
+                ResetForm();
+            }
+            else
+            {
+                MessageBox.Show(message, "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        private void btnRegisterAndQueue_Click(object sender, EventArgs e)
+        {
+            PatientDTO newPatient = GetPatientFromForm();
+            string reason = txtInitialReason.Text.Trim();
+
+            var (isSuccess, message, patientId) = _patientBLL.RegisterAndQueue(newPatient, reason);
+
+            if (isSuccess)
+            {
+                MessageBox.Show(
+                    $"{message}\n\n• Mã bệnh nhân: {patientId}\n• Lý do khám: {(string.IsNullOrWhiteSpace(reason) ? "Khám bệnh nhân mới" : reason)}\n\nBệnh nhân đã được đưa vào hàng đợi tại mục Lịch Hẹn & Khám Bệnh!",
+                    "Tiếp nhận thành công",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+
                 LoadPatientList();
                 ResetForm();
             }

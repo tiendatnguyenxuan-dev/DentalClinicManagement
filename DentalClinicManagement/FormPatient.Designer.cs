@@ -37,12 +37,15 @@ namespace DentalClinicManagement
             lblFullName = new Label();
             txtPatientId = new TextBox();
             lblPatientId = new Label();
+            lblInitialReason = new Label();
+            txtInitialReason = new TextBox();
             pnlButtons = new Panel();
             btnClear = new Button();
             btnViewRecord = new Button();
             btnDelete = new Button();
             btnUpdate = new Button();
             btnAdd = new Button();
+            btnRegisterAndQueue = new Button();
             pnlSearch = new Panel();
             btnRefresh = new Button();
             btnSearch = new Button();
@@ -87,6 +90,8 @@ namespace DentalClinicManagement
             // 
             // grpInfo
             // 
+            grpInfo.Controls.Add(lblInitialReason);
+            grpInfo.Controls.Add(txtInitialReason);
             grpInfo.Controls.Add(txtAllergies);
             grpInfo.Controls.Add(lblAllergies);
             grpInfo.Controls.Add(txtMedicalHistory);
@@ -255,27 +260,103 @@ namespace DentalClinicManagement
             lblPatientId.TabIndex = 0;
             lblPatientId.Text = "Mã BN:";
             // 
+            // lblInitialReason
+            // 
+            lblInitialReason.AutoSize = true;
+            lblInitialReason.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            lblInitialReason.ForeColor = Color.DarkSlateBlue;
+            lblInitialReason.Location = new Point(20, 190);
+            lblInitialReason.Name = "lblInitialReason";
+            lblInitialReason.Size = new Size(106, 21);
+            lblInitialReason.TabIndex = 16;
+            lblInitialReason.Text = "Lý do khám:";
+            // 
+            // txtInitialReason
+            // 
+            txtInitialReason.Location = new Point(130, 187);
+            txtInitialReason.Name = "txtInitialReason";
+            txtInitialReason.PlaceholderText = "Nhập lý do đến khám (VD: Đau răng, nhổ răng khôn, cạo vôi,...)";
+            txtInitialReason.Size = new Size(820, 29);
+            txtInitialReason.TabIndex = 8;
+            // 
             // pnlButtons
             // 
             pnlButtons.Controls.Add(btnViewRecord);
             pnlButtons.Controls.Add(btnClear);
             pnlButtons.Controls.Add(btnDelete);
             pnlButtons.Controls.Add(btnUpdate);
+            pnlButtons.Controls.Add(btnRegisterAndQueue);
             pnlButtons.Controls.Add(btnAdd);
-            pnlButtons.Location = new Point(15, 255);
+            pnlButtons.Location = new Point(15, 290);
             pnlButtons.Name = "pnlButtons";
             pnlButtons.Size = new Size(970, 45);
             pnlButtons.TabIndex = 2;
+            // 
+            // btnAdd
+            // 
+            btnAdd.BackColor = Color.RoyalBlue;
+            btnAdd.FlatStyle = FlatStyle.Flat;
+            btnAdd.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnAdd.ForeColor = Color.White;
+            btnAdd.Location = new Point(0, 5);
+            btnAdd.Name = "btnAdd";
+            btnAdd.Size = new Size(110, 35);
+            btnAdd.TabIndex = 0;
+            btnAdd.Text = " Thêm mới";
+            btnAdd.UseVisualStyleBackColor = false;
+            btnAdd.Click += btnAdd_Click;
+            // 
+            // btnRegisterAndQueue
+            // 
+            btnRegisterAndQueue.BackColor = Color.ForestGreen;
+            btnRegisterAndQueue.FlatStyle = FlatStyle.Flat;
+            btnRegisterAndQueue.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnRegisterAndQueue.ForeColor = Color.White;
+            btnRegisterAndQueue.Location = new Point(120, 5);
+            btnRegisterAndQueue.Name = "btnRegisterAndQueue";
+            btnRegisterAndQueue.Size = new Size(190, 35);
+            btnRegisterAndQueue.TabIndex = 1;
+            btnRegisterAndQueue.Text = " Thêm & Tiếp nhận khám";
+            btnRegisterAndQueue.UseVisualStyleBackColor = false;
+            btnRegisterAndQueue.Click += btnRegisterAndQueue_Click;
+            // 
+            // btnUpdate
+            // 
+            btnUpdate.BackColor = Color.Orange;
+            btnUpdate.FlatStyle = FlatStyle.Flat;
+            btnUpdate.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnUpdate.ForeColor = Color.White;
+            btnUpdate.Location = new Point(320, 5);
+            btnUpdate.Name = "btnUpdate";
+            btnUpdate.Size = new Size(110, 35);
+            btnUpdate.TabIndex = 2;
+            btnUpdate.Text = " Cập nhật";
+            btnUpdate.UseVisualStyleBackColor = false;
+            btnUpdate.Click += btnUpdate_Click;
+            // 
+            // btnDelete
+            // 
+            btnDelete.BackColor = Color.Crimson;
+            btnDelete.FlatStyle = FlatStyle.Flat;
+            btnDelete.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnDelete.ForeColor = Color.White;
+            btnDelete.Location = new Point(440, 5);
+            btnDelete.Name = "btnDelete";
+            btnDelete.Size = new Size(100, 35);
+            btnDelete.TabIndex = 3;
+            btnDelete.Text = " Xóa";
+            btnDelete.UseVisualStyleBackColor = false;
+            btnDelete.Click += btnDelete_Click;
             // 
             // btnClear
             // 
             btnClear.BackColor = Color.DimGray;
             btnClear.FlatStyle = FlatStyle.Flat;
             btnClear.ForeColor = Color.White;
-            btnClear.Location = new Point(480, 5);
+            btnClear.Location = new Point(550, 5);
             btnClear.Name = "btnClear";
-            btnClear.Size = new Size(130, 35);
-            btnClear.TabIndex = 3;
+            btnClear.Size = new Size(110, 35);
+            btnClear.TabIndex = 4;
             btnClear.Text = " Làm mới";
             btnClear.UseVisualStyleBackColor = false;
             btnClear.Click += btnClear_Click;
@@ -286,55 +367,13 @@ namespace DentalClinicManagement
             btnViewRecord.FlatStyle = FlatStyle.Flat;
             btnViewRecord.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnViewRecord.ForeColor = Color.White;
-            btnViewRecord.Location = new Point(640, 5);
+            btnViewRecord.Location = new Point(670, 5);
             btnViewRecord.Name = "btnViewRecord";
             btnViewRecord.Size = new Size(160, 35);
-            btnViewRecord.TabIndex = 4;
+            btnViewRecord.TabIndex = 5;
             btnViewRecord.Text = " Hồ sơ bệnh án";
             btnViewRecord.UseVisualStyleBackColor = false;
             btnViewRecord.Click += btnViewRecord_Click;
-            // 
-            // btnDelete
-            // 
-            btnDelete.BackColor = Color.Crimson;
-            btnDelete.FlatStyle = FlatStyle.Flat;
-            btnDelete.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            btnDelete.ForeColor = Color.White;
-            btnDelete.Location = new Point(320, 5);
-            btnDelete.Name = "btnDelete";
-            btnDelete.Size = new Size(130, 35);
-            btnDelete.TabIndex = 2;
-            btnDelete.Text = " Xóa";
-            btnDelete.UseVisualStyleBackColor = false;
-            btnDelete.Click += btnDelete_Click;
-            // 
-            // btnUpdate
-            // 
-            btnUpdate.BackColor = Color.Orange;
-            btnUpdate.FlatStyle = FlatStyle.Flat;
-            btnUpdate.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            btnUpdate.ForeColor = Color.White;
-            btnUpdate.Location = new Point(160, 5);
-            btnUpdate.Name = "btnUpdate";
-            btnUpdate.Size = new Size(130, 35);
-            btnUpdate.TabIndex = 1;
-            btnUpdate.Text = " Cập nhật";
-            btnUpdate.UseVisualStyleBackColor = false;
-            btnUpdate.Click += btnUpdate_Click;
-            // 
-            // btnAdd
-            // 
-            btnAdd.BackColor = Color.RoyalBlue;
-            btnAdd.FlatStyle = FlatStyle.Flat;
-            btnAdd.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            btnAdd.ForeColor = Color.White;
-            btnAdd.Location = new Point(0, 5);
-            btnAdd.Name = "btnAdd";
-            btnAdd.Size = new Size(130, 35);
-            btnAdd.TabIndex = 0;
-            btnAdd.Text = " Thêm mới";
-            btnAdd.UseVisualStyleBackColor = false;
-            btnAdd.Click += btnAdd_Click;
             // 
             // pnlSearch
             // 
@@ -342,7 +381,7 @@ namespace DentalClinicManagement
             pnlSearch.Controls.Add(btnSearch);
             pnlSearch.Controls.Add(txtSearch);
             pnlSearch.Controls.Add(lblSearch);
-            pnlSearch.Location = new Point(15, 305);
+            pnlSearch.Location = new Point(15, 340);
             pnlSearch.Name = "pnlSearch";
             pnlSearch.Size = new Size(970, 40);
             pnlSearch.TabIndex = 3;
@@ -397,7 +436,7 @@ namespace DentalClinicManagement
             dgvPatients.BackgroundColor = Color.White;
             dgvPatients.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvPatients.Columns.AddRange(new DataGridViewColumn[] { colId, colName, colGender, colDOB, colPhone, colAddress, colHistory, colAllergies });
-            dgvPatients.Location = new Point(15, 355);
+            dgvPatients.Location = new Point(15, 390);
             dgvPatients.MultiSelect = false;
             dgvPatients.Name = "dgvPatients";
             dgvPatients.ReadOnly = true;
@@ -487,7 +526,7 @@ namespace DentalClinicManagement
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1000, 610);
+            ClientSize = new Size(1000, 650);
             Controls.Add(dgvPatients);
             Controls.Add(pnlSearch);
             Controls.Add(pnlButtons);
@@ -530,6 +569,7 @@ namespace DentalClinicManagement
         private Label lblMedicalHistory;
         private Panel pnlButtons;
         private Button btnAdd;
+        private Button btnRegisterAndQueue;
         private Button btnUpdate;
         private Button btnDelete;
         private Button btnClear;
@@ -550,5 +590,7 @@ namespace DentalClinicManagement
         private DataGridViewTextBoxColumn colAllergies;
         private TextBox txtAllergies;
         private Label lblAllergies;
+        private Label lblInitialReason;
+        private TextBox txtInitialReason;
     }
 }

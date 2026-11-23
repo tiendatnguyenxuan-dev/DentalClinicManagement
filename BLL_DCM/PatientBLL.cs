@@ -9,6 +9,7 @@ namespace BLL_DCM
     public class PatientBLL
     {
         private readonly PatientDAL _patientDAL = new();
+        private readonly AppointmentDAL _appointmentDAL = new();
 
         // Lấy danh sách bệnh nhân
         public List<PatientDTO> GetAllPatients()
@@ -32,6 +33,53 @@ namespace BLL_DCM
 
             bool added = _patientDAL.Add(patient);
             return added ? (true, "Thêm bệnh nhân thành công!") : (false, "Không thể thêm bệnh nhân.");
+        }
+
+        // Đăng ký bệnh nhân mới VÀ tự động tiếp nhận vào hàng đợi khám với lý do khám
+        public (bool IsSuccess, string Message, int PatientId) RegisterAndQueue(PatientDTO patient, string? reason, int? doctorId = null)
+        {
+            var validation = ValidatePatient(patient, isUpdate: false);
+            if (!validation.IsValid)
+                return (false, validation.Message, 0);
+
+            try
+            {
+                int newPatientId = _patientDAL.AddAndReturnId(patient);
+                if (newPatientId <= 0)
+                {
+                    return (false, "Không thể lưu thông tin bệnh nhân.", 0);
+                }
+
+                // Nếu chưa chỉ định bác sĩ, lấy bác sĩ đầu tiên có sẵn trong hệ thống
+                int targetDoctorId = doctorId ?? 0;
+                if (targetDoctorId <= 0)
+                {
+                    var doctors = _appointmentDAL.GetDoctorLookupList();
+                    if (doctors.Count > 0)
+                    {
+                        targetDoctorId = doctors[0].EmployeeID;
+                    }
+                }
+
+                if (targetDoctorId > 0)
+                {
+                    var appointment = new AppointmentDTO
+                    {
+                        PatientID = newPatientId,
+                        DoctorID = targetDoctorId,
+                        AppointmentDateTime = DateTime.Now,
+                        AppointmentStatus = "Confirmed", // Trạng thái đã tiếp nhận tại phòng khám
+                        Notes = string.IsNullOrWhiteSpace(reason) ? "Khám bệnh nhân mới" : reason.Trim()
+                    };
+                    _appointmentDAL.AddAppointment(appointment);
+                }
+
+                return (true, "Thêm bệnh nhân và chuyển vào tiếp nhận khám thành công!", newPatientId);
+            }
+            catch (Exception ex)
+            {
+                return (false, "Lỗi tiếp nhận khám: " + ex.Message, 0);
+            }
         }
 
         // Cập nhật bệnh nhân
