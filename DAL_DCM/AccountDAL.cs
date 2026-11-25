@@ -2,7 +2,6 @@ using DTO_DCM;
 using MySqlConnector;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace DAL_DCM
 {
@@ -12,12 +11,10 @@ namespace DAL_DCM
 
         public AccountDAL()
         {
-            // Khởi tạo kết nối CSDL ở đây nếu cần
         }
 
-
         /// <summary>
-        /// Kiểm tra thông tin đăng nhập từ MySQL
+        /// Kiểm tra thông tin đăng nhập từ MySQL và nạp đầy đủ AccountID, EmployeeID, FullName, Role
         /// </summary>
         public AccountDTO? CheckLogin(string username, string password)
         {
@@ -28,10 +25,14 @@ namespace DAL_DCM
                     conn.Open();
 
                     string query = @"
-                        SELECT *
-                        FROM Account
-                        WHERE Username = @username
-                        AND PasswordHash = @password
+                        SELECT a.AccountID, a.EmployeeID, a.Username, a.PasswordHash, a.AccountStatus,
+                               COALESCE(e.FullName, a.Username) AS FullName,
+                               COALESCE(e.Position, 'Admin') AS Role
+                        FROM Account a
+                        LEFT JOIN Employee e ON a.EmployeeID = e.EmployeeID
+                        WHERE a.Username = @username
+                          AND a.PasswordHash = @password
+                          AND a.AccountStatus = 'Active'
                         LIMIT 1";
 
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
@@ -43,19 +44,23 @@ namespace DAL_DCM
                         {
                             if (reader.Read())
                             {
-                                return new AccountDTO(
-                                    reader["Username"].ToString()!,
-                                    reader["PasswordHash"].ToString()!
-                            
-                                );
+                                return new AccountDTO
+                                {
+                                    AccountID = Convert.ToInt32(reader["AccountID"]),
+                                    EmployeeID = reader["EmployeeID"] != DBNull.Value ? Convert.ToInt32(reader["EmployeeID"]) : 0,
+                                    Username = reader["Username"].ToString()!,
+                                    Password = reader["PasswordHash"].ToString()!,
+                                    FullName = reader["FullName"].ToString()!,
+                                    Role = reader["Role"].ToString()!,
+                                    AccountStatus = reader["AccountStatus"].ToString()!
+                                };
                             }
                         }
                     }
                 }
                 catch (MySqlException ex)
                 {
-                    throw new Exception(
-                        "Lỗi kết nối hoặc truy vấn MySQL: " + ex.Message);
+                    throw new Exception("Lỗi kết nối hoặc truy vấn MySQL: " + ex.Message);
                 }
             }
 
@@ -63,4 +68,3 @@ namespace DAL_DCM
         }
     }
 }
-
