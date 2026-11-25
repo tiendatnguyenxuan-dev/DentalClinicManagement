@@ -19,6 +19,15 @@ namespace DentalClinicManagement
             panelTop = new Panel();
             lblTitle = new Label();
             grpInfo = new GroupBox();
+            pnlFilter = new Panel();
+            txtSearch = new TextBox();
+            lblSearch = new Label();
+            btnSearch = new Button();
+            btnResetFilter = new Button();
+            cboFilterUnit = new ComboBox();
+            lblFilterUnit = new Label();
+            cboFilterStock = new ComboBox();
+            lblFilterStock = new Label();
             btnReset = new Button();
             btnDelete = new Button();
             btnUpdate = new Button();
@@ -41,6 +50,7 @@ namespace DentalClinicManagement
             colStock = new DataGridViewTextBoxColumn();
             panelTop.SuspendLayout();
             grpInfo.SuspendLayout();
+            pnlFilter.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)nudStock).BeginInit();
             ((System.ComponentModel.ISupportInitialize)nudPrice).BeginInit();
             ((System.ComponentModel.ISupportInitialize)dgvMedicines).BeginInit();
@@ -53,7 +63,7 @@ namespace DentalClinicManagement
             panelTop.Dock = DockStyle.Top;
             panelTop.Location = new Point(0, 0);
             panelTop.Name = "panelTop";
-            panelTop.Size = new Size(880, 50);
+            panelTop.Size = new Size(1000, 50);
             panelTop.TabIndex = 0;
             // 
             // lblTitle
@@ -86,10 +96,111 @@ namespace DentalClinicManagement
             grpInfo.Dock = DockStyle.Top;
             grpInfo.Location = new Point(0, 50);
             grpInfo.Name = "grpInfo";
-            grpInfo.Size = new Size(880, 160);
+            grpInfo.Size = new Size(1000, 155);
             grpInfo.TabIndex = 1;
             grpInfo.TabStop = false;
             grpInfo.Text = "Thông tin thuốc";
+            // 
+            // pnlFilter
+            // 
+            pnlFilter.BackColor = Color.FromArgb(248, 249, 250);
+            pnlFilter.Controls.Add(btnResetFilter);
+            pnlFilter.Controls.Add(btnSearch);
+            pnlFilter.Controls.Add(cboFilterStock);
+            pnlFilter.Controls.Add(lblFilterStock);
+            pnlFilter.Controls.Add(cboFilterUnit);
+            pnlFilter.Controls.Add(lblFilterUnit);
+            pnlFilter.Controls.Add(txtSearch);
+            pnlFilter.Controls.Add(lblSearch);
+            pnlFilter.Dock = DockStyle.Top;
+            pnlFilter.Location = new Point(0, 205);
+            pnlFilter.Name = "pnlFilter";
+            pnlFilter.Size = new Size(1000, 50);
+            pnlFilter.TabIndex = 2;
+            // 
+            // lblSearch
+            // 
+            lblSearch.AutoSize = true;
+            lblSearch.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblSearch.Location = new Point(15, 15);
+            lblSearch.Name = "lblSearch";
+            lblSearch.Size = new Size(76, 20);
+            lblSearch.TabIndex = 0;
+            lblSearch.Text = "Tìm kiếm:";
+            // 
+            // txtSearch
+            // 
+            txtSearch.Location = new Point(95, 12);
+            txtSearch.Name = "txtSearch";
+            txtSearch.PlaceholderText = "Nhập tên thuốc, giá hoặc điều kiện...";
+            txtSearch.Size = new Size(320, 27);
+            txtSearch.TabIndex = 1;
+            // 
+            // lblFilterUnit
+            // 
+            lblFilterUnit.AutoSize = true;
+            lblFilterUnit.Location = new Point(430, 15);
+            lblFilterUnit.Name = "lblFilterUnit";
+            lblFilterUnit.Size = new Size(55, 20);
+            lblFilterUnit.TabIndex = 2;
+            lblFilterUnit.Text = "Đơn vị:";
+            // 
+            // cboFilterUnit
+            // 
+            cboFilterUnit.DropDownStyle = ComboBoxStyle.DropDownList;
+            cboFilterUnit.FormattingEnabled = true;
+            cboFilterUnit.Items.AddRange(new object[] { "Tất cả", "Viên", "Vỉ", "Hộp", "Chai", "Ống", "Gói" });
+            cboFilterUnit.Location = new Point(490, 12);
+            cboFilterUnit.Name = "cboFilterUnit";
+            cboFilterUnit.Size = new Size(100, 28);
+            cboFilterUnit.TabIndex = 3;
+            // 
+            // lblFilterStock
+            // 
+            lblFilterStock.AutoSize = true;
+            lblFilterStock.Location = new Point(605, 15);
+            lblFilterStock.Name = "lblFilterStock";
+            lblFilterStock.Size = new Size(65, 20);
+            lblFilterStock.TabIndex = 4;
+            lblFilterStock.Text = "Tồn kho:";
+            // 
+            // cboFilterStock
+            // 
+            cboFilterStock.DropDownStyle = ComboBoxStyle.DropDownList;
+            cboFilterStock.FormattingEnabled = true;
+            cboFilterStock.Items.AddRange(new object[] { "Tất cả", "Hết hàng (= 0)", "Sắp hết (< 50)", "Còn hàng (> 0)" });
+            cboFilterStock.Location = new Point(675, 12);
+            cboFilterStock.Name = "cboFilterStock";
+            cboFilterStock.Size = new Size(135, 28);
+            cboFilterStock.TabIndex = 5;
+            // 
+            // btnSearch
+            // 
+            btnSearch.BackColor = Color.FromArgb(41, 128, 185);
+            btnSearch.FlatStyle = FlatStyle.Flat;
+            btnSearch.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnSearch.ForeColor = Color.White;
+            btnSearch.Location = new Point(825, 9);
+            btnSearch.Name = "btnSearch";
+            btnSearch.Size = new Size(85, 32);
+            btnSearch.TabIndex = 6;
+            btnSearch.Text = "Lọc";
+            btnSearch.UseVisualStyleBackColor = false;
+            btnSearch.Click += btnSearch_Click;
+            // 
+            // btnResetFilter
+            // 
+            btnResetFilter.BackColor = Color.FromArgb(149, 165, 166);
+            btnResetFilter.FlatStyle = FlatStyle.Flat;
+            btnResetFilter.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnResetFilter.ForeColor = Color.White;
+            btnResetFilter.Location = new Point(915, 9);
+            btnResetFilter.Name = "btnResetFilter";
+            btnResetFilter.Size = new Size(75, 32);
+            btnResetFilter.TabIndex = 7;
+            btnResetFilter.Text = "Đặt lại";
+            btnResetFilter.UseVisualStyleBackColor = false;
+            btnResetFilter.Click += btnResetFilter_Click;
             // 
             // btnReset
             // 
@@ -232,14 +343,14 @@ namespace DentalClinicManagement
             dgvMedicines.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvMedicines.Columns.AddRange(new DataGridViewColumn[] { colMedID, colMedName, colUnit, colPrice, colStock });
             dgvMedicines.Dock = DockStyle.Fill;
-            dgvMedicines.Location = new Point(0, 210);
+            dgvMedicines.Location = new Point(0, 255);
             dgvMedicines.MultiSelect = false;
             dgvMedicines.Name = "dgvMedicines";
             dgvMedicines.ReadOnly = true;
             dgvMedicines.RowHeadersVisible = false;
             dgvMedicines.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvMedicines.Size = new Size(880, 390);
-            dgvMedicines.TabIndex = 2;
+            dgvMedicines.Size = new Size(1000, 395);
+            dgvMedicines.TabIndex = 3;
             dgvMedicines.CellClick += dgvMedicines_CellClick;
             // 
             // colMedID
@@ -286,8 +397,9 @@ namespace DentalClinicManagement
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(880, 600);
+            ClientSize = new Size(1000, 650);
             Controls.Add(dgvMedicines);
+            Controls.Add(pnlFilter);
             Controls.Add(grpInfo);
             Controls.Add(panelTop);
             Name = "FormMedicine";
@@ -298,6 +410,8 @@ namespace DentalClinicManagement
             panelTop.PerformLayout();
             grpInfo.ResumeLayout(false);
             grpInfo.PerformLayout();
+            pnlFilter.ResumeLayout(false);
+            pnlFilter.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)nudStock).EndInit();
             ((System.ComponentModel.ISupportInitialize)nudPrice).EndInit();
             ((System.ComponentModel.ISupportInitialize)dgvMedicines).EndInit();
@@ -328,5 +442,14 @@ namespace DentalClinicManagement
         private DataGridViewTextBoxColumn colUnit;
         private DataGridViewTextBoxColumn colPrice;
         private DataGridViewTextBoxColumn colStock;
+        private Panel pnlFilter;
+        private Label lblSearch;
+        private TextBox txtSearch;
+        private Label lblFilterUnit;
+        private ComboBox cboFilterUnit;
+        private Label lblFilterStock;
+        private ComboBox cboFilterStock;
+        private Button btnSearch;
+        private Button btnResetFilter;
     }
 }

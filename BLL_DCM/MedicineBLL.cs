@@ -55,6 +55,11 @@ namespace BLL_DCM
             }
         }
 
+        public List<MedicineDTO> SearchWithFilter(string? searchInput, string? unitFilter = null, string? stockStatus = null)
+        {
+            return _dal.SearchWithFilter(searchInput, unitFilter, stockStatus);
+        }
+
         // --- Prescription ---
         public PrescriptionDTO? GetPrescriptionByExamId(int examId) => _dal.GetPrescriptionByExamId(examId);
 

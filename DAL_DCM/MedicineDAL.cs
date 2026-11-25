@@ -78,6 +78,128 @@ namespace DAL_DCM
             return cmd.ExecuteNonQuery() > 0;
         }
 
+        /// <summary>
+        /// Tìm kiếm nâng cao phân tích biểu thức (Backend Parser):
+        /// - Hỗ trợ các phép toán logic: AND, OR, NOT
+        /// - Hỗ trợ các phép so sánh số: >, >=, <, <=, =, <> (hoặc !=) trên 1 field hoặc nhiều field
+        /// Ví dụ biểu thức hợp lệ người dùng có thể gõ hoặc filter thông thường chuyển sang:
+        ///   "paracetamol AND gia >= 1000"
+        ///   "ton < 50 OR ton = 0"
+        ///   "NOT vien AND gia <> 500"
+        /// </summary>
+        public List<MedicineDTO> SearchWithFilter(string? searchInput, string? unitFilter = null, string? stockStatus = null)
+        {
+            var list = new List<MedicineDTO>();
+            using var conn = _db.GetConnection();
+            conn.Open();
+
+            using var cmd = new MySqlCommand();
+            cmd.Connection = conn;
+
+            var whereClauses = new List<string> { "IsDeleted = 0" };
+
+            // 1. Lọc theo Dropdown Đơn vị (nếu có chọn)
+            if (!string.IsNullOrEmpty(unitFilter) && unitFilter != "Tất cả")
+            {
+                whereClauses.Add("Unit = @UnitFilter");
+                cmd.Parameters.AddWithValue("@UnitFilter", unitFilter);
+            }
+
+            // 2. Lọc theo Dropdown Trạng thái tồn kho (nếu có chọn)
+            if (!string.IsNullOrEmpty(stockStatus) && stockStatus != "Tất cả")
+            {
+                if (stockStatus.Contains("= 0"))
+                    whereClauses.Add("StockQuantity = 0");
+                else if (stockStatus.Contains("< 50"))
+                    whereClauses.Add("StockQuantity < 50");
+                else if (stockStatus.Contains("> 0"))
+                    whereClauses.Add("StockQuantity > 0");
+            }
+
+            // 3. Phân tích chuỗi tìm kiếm (Backend Search Parser)
+            if (!string.IsNullOrWhiteSpace(searchInput))
+            {
+                string parsedSql = ParseSearchExpression(searchInput.Trim(), cmd);
+                if (!string.IsNullOrEmpty(parsedSql))
+                {
+                    whereClauses.Add($"({parsedSql})");
+                }
+            }
+
+            cmd.CommandText = $"SELECT * FROM Medicine WHERE {string.Join(" AND ", whereClauses)} ORDER BY MedicineName";
+
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                list.Add(new MedicineDTO
+                {
+                    MedicineID = Convert.ToInt32(reader["MedicineID"]),
+                    MedicineName = reader["MedicineName"].ToString()!,
+                    Unit = reader["Unit"]?.ToString(),
+                    UnitPrice = Convert.ToDecimal(reader["UnitPrice"]),
+                    StockQuantity = Convert.ToInt32(reader["StockQuantity"]),
+                    IsDeleted = Convert.ToBoolean(reader["IsDeleted"])
+                });
+            }
+            return list;
+        }
+
+        private string ParseSearchExpression(string rawInput, MySqlCommand cmd)
+        {
+            // Kiểm tra xem input có chứa toán tử OR không
+            bool hasOr = System.Text.RegularExpressions.Regex.IsMatch(rawInput, @"\s+OR\s+", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            string[] tokens = hasOr 
+                ? System.Text.RegularExpressions.Regex.Split(rawInput, @"\s+OR\s+", System.Text.RegularExpressions.RegexOptions.IgnoreCase)
+                : System.Text.RegularExpressions.Regex.Split(rawInput, @"\s+AND\s+", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+            string joiner = hasOr ? " OR " : " AND ";
+            var partClauses = new List<string>();
+            int paramIndex = 0;
+
+            foreach (var token in tokens)
+            {
+                string trimmed = token.Trim();
+                if (string.IsNullOrEmpty(trimmed)) continue;
+
+                bool isNot = false;
+                if (trimmed.StartsWith("NOT ", StringComparison.OrdinalIgnoreCase))
+                {
+                    isNot = true;
+                    trimmed = trimmed.Substring(4).Trim();
+                }
+
+                // Kiểm tra phép so sánh số: >, >=, <, <=, =, <>, !=
+                // Cú pháp hỗ trợ: "gia >= 1000", "ton < 50", "price > 500", "stock <= 10", hoặc chỉ gõ "> 1000"
+                var match = System.Text.RegularExpressions.Regex.Match(trimmed, @"^(gia|price|ton|stock)?\s*(>=|<=|<>|!=|>|<|=)\s*(\d+(\.\d+)?)$", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                if (match.Success)
+                {
+                    string fieldPrefix = match.Groups[1].Value.ToLower();
+                    string op = match.Groups[2].Value == "!=" ? "<>" : match.Groups[2].Value;
+                    string valStr = match.Groups[3].Value;
+                    string targetCol = (fieldPrefix == "ton" || fieldPrefix == "stock") ? "StockQuantity" : "UnitPrice";
+                    
+                    string pName = $"@numParam_{paramIndex++}";
+                    cmd.Parameters.AddWithValue(pName, decimal.Parse(valStr, System.Globalization.CultureInfo.InvariantCulture));
+
+                    string clause = $"{targetCol} {op} {pName}";
+                    if (isNot) clause = $"NOT ({clause})";
+                    partClauses.Add(clause);
+                }
+                else
+                {
+                    // Lọc chuỗi (Tên thuốc / Đơn vị)
+                    string pName = $"@strParam_{paramIndex++}";
+                    cmd.Parameters.AddWithValue(pName, $"%{trimmed}%");
+
+                    string clause = $"(MedicineName LIKE {pName} OR Unit LIKE {pName})";
+                    if (isNot) clause = $"(MedicineName NOT LIKE {pName} AND (Unit IS NULL OR Unit NOT LIKE {pName}))";
+                    partClauses.Add(clause);
+                }
+            }
+
+            return partClauses.Count > 0 ? string.Join(joiner, partClauses) : "";
+        }
+
         // --- Prescription & Details ---
         public PrescriptionDTO? GetPrescriptionByExamId(int examId)
         {

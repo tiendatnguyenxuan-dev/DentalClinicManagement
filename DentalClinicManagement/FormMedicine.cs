@@ -19,6 +19,8 @@ namespace DentalClinicManagement
 
         private void FormMedicine_Load(object sender, EventArgs e)
         {
+            cboFilterUnit.SelectedIndex = 0;
+            cboFilterStock.SelectedIndex = 0;
             LoadMedicines();
             ResetForm();
         }
@@ -121,6 +123,37 @@ namespace DentalClinicManagement
         private void btnReset_Click(object sender, EventArgs e)
         {
             ResetForm();
+        }
+
+        private void btnSearch_Click(object sender, EventArgs e)
+        {
+            ExecuteFilter();
+        }
+
+        private void btnResetFilter_Click(object sender, EventArgs e)
+        {
+            txtSearch.Clear();
+            cboFilterUnit.SelectedIndex = 0;
+            cboFilterStock.SelectedIndex = 0;
+            LoadMedicines();
+        }
+
+        private void ExecuteFilter()
+        {
+            try
+            {
+                string searchInput = txtSearch.Text.Trim();
+                string? unit = cboFilterUnit.SelectedItem?.ToString();
+                string? stock = cboFilterStock.SelectedItem?.ToString();
+
+                var results = _medBLL.SearchWithFilter(searchInput, unit, stock);
+                dgvMedicines.DataSource = null;
+                dgvMedicines.DataSource = results;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi tìm kiếm: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void ResetForm()
