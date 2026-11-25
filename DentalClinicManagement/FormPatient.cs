@@ -13,7 +13,6 @@ namespace DentalClinicManagement
         public FormPatient()
         {
             InitializeComponent();
-            dtpDOB.ShowCheckBox = true;
         }
 
         private void FormPatient_Load(object sender, EventArgs e)
@@ -70,16 +69,19 @@ namespace DentalClinicManagement
             if (cboGender.Items.Count > 0)
                 cboGender.SelectedIndex = 0;
 
-            dtpDOB.Value = DateTime.Today;
-            dtpDOB.Checked = false;
+            dtpDOB.Text = "";
+            txtAllergies.Clear();
 
             txtPhone.Clear();
             txtAddress.Clear();
             txtMedicalHistory.Clear();
+            txtInitialReason.Clear();
 
             btnAdd.Enabled = true;
+            btnRegisterAndQueue.Enabled = true;
             btnUpdate.Enabled = false;
             btnDelete.Enabled = false;
+            btnViewRecord.Enabled = false;
 
             txtFullName.Focus();
         }
@@ -97,23 +99,37 @@ namespace DentalClinicManagement
 
                 if (patient.DateOfBirth.HasValue)
                 {
-                    dtpDOB.Value = patient.DateOfBirth.Value;
-                    dtpDOB.Checked = true;
+                    dtpDOB.Text = patient.DateOfBirth.Value.ToString("dd/MM/yyyy");
                 }
                 else
                 {
-                    dtpDOB.Value = DateTime.Today;
-                    dtpDOB.Checked = false;
+                    dtpDOB.Text = "";
                 }
 
                 txtPhone.Text = patient.Phone ?? "";
                 txtAddress.Text = patient.Address ?? "";
                 txtMedicalHistory.Text = patient.MedicalHistory ?? "";
+                txtAllergies.Text = patient.Allergies ?? "";
+                txtInitialReason.Clear();
 
                 btnAdd.Enabled = false;
+                btnRegisterAndQueue.Enabled = false;
                 btnUpdate.Enabled = true;
                 btnDelete.Enabled = true;
+                btnViewRecord.Enabled = true;
             }
+        }
+
+        private DateTime? GetDOBFromInput()
+        {
+            string raw = dtpDOB.Text.Replace("_", "").Trim();
+            if (string.IsNullOrWhiteSpace(raw) || raw == "//" || raw.Length < 8)
+                return null;
+            if (DateTime.TryParseExact(dtpDOB.Text, "dd/MM/yyyy",
+                    System.Globalization.CultureInfo.InvariantCulture,
+                    System.Globalization.DateTimeStyles.None, out DateTime dob))
+                return dob;
+            return null;
         }
 
         private PatientDTO GetPatientFromForm()
@@ -122,10 +138,11 @@ namespace DentalClinicManagement
             {
                 FullName = txtFullName.Text.Trim(),
                 Gender = GetDatabaseGender(),
-                DateOfBirth = dtpDOB.Checked ? dtpDOB.Value.Date : null,
+                DateOfBirth = GetDOBFromInput(),
                 Phone = string.IsNullOrWhiteSpace(txtPhone.Text) ? null : txtPhone.Text.Trim(),
                 Address = string.IsNullOrWhiteSpace(txtAddress.Text) ? null : txtAddress.Text.Trim(),
-                MedicalHistory = string.IsNullOrWhiteSpace(txtMedicalHistory.Text) ? null : txtMedicalHistory.Text.Trim()
+                MedicalHistory = string.IsNullOrWhiteSpace(txtMedicalHistory.Text) ? null : txtMedicalHistory.Text.Trim(),
+                Allergies = string.IsNullOrWhiteSpace(txtAllergies.Text) ? null : txtAllergies.Text.Trim()
             };
         }
 
@@ -137,6 +154,30 @@ namespace DentalClinicManagement
             if (isSuccess)
             {
                 MessageBox.Show(message, "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                LoadPatientList();
+                ResetForm();
+            }
+            else
+            {
+                MessageBox.Show(message, "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        private void btnRegisterAndQueue_Click(object sender, EventArgs e)
+        {
+            PatientDTO newPatient = GetPatientFromForm();
+            string reason = txtInitialReason.Text.Trim();
+
+            var (isSuccess, message, patientId) = _patientBLL.RegisterAndQueue(newPatient, reason);
+
+            if (isSuccess)
+            {
+                MessageBox.Show(
+                    $"{message}\n\n• Mã bệnh nhân: {patientId}\n• Lý do khám: {(string.IsNullOrWhiteSpace(reason) ? "Khám bệnh nhân mới" : reason)}\n\nBệnh nhân đã được đưa vào hàng đợi tại mục Lịch Hẹn & Khám Bệnh!",
+                    "Tiếp nhận thành công",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+
                 LoadPatientList();
                 ResetForm();
             }
@@ -229,6 +270,50 @@ namespace DentalClinicManagement
                 e.SuppressKeyPress = true;
                 btnSearch_Click(sender, e);
             }
+        }
+
+        private void btnViewRecord_Click(object sender, EventArgs e)
+        {
+            OpenMedicalRecordOfSelectedPatient();
+        }
+
+        private void dgvPatients_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0 && e.RowIndex < dgvPatients.Rows.Count)
+            {
+                if (dgvPatients.Rows[e.RowIndex].DataBoundItem is PatientDTO patient)
+                {
+                    OpenMedicalRecordOfSelectedPatient(patient.PatientID);
+                    return;
+                }
+                OpenMedicalRecordOfSelectedPatient();
+            }
+        }
+
+        private void OpenMedicalRecordOfSelectedPatient(int? specificPatientId = null)
+        {
+            int patientId = 0;
+            if (specificPatientId.HasValue && specificPatientId.Value > 0)
+            {
+                patientId = specificPatientId.Value;
+            }
+            else if (dgvPatients.CurrentRow?.DataBoundItem is PatientDTO p)
+            {
+                patientId = p.PatientID;
+            }
+            else if (int.TryParse(txtPatientId.Text, out int id) && id > 0)
+            {
+                patientId = id;
+            }
+
+            if (patientId <= 0)
+            {
+                MessageBox.Show("Vui lòng chọn một bệnh nhân từ danh sách để xem hồ sơ bệnh án!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            var formRecord = new FormMedicalRecord(patientId);
+            formRecord.ShowDialog();
         }
     }
 }

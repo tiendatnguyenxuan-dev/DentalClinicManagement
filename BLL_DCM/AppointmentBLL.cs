@@ -1,4 +1,4 @@
-﻿using DAL_DCM;
+using DAL_DCM;
 using DTO_DCM;
 using System;
 using System.Collections.Generic;
@@ -155,13 +155,25 @@ namespace BLL_DCM
                 return OperationResult.Failure("Vui lòng chọn lịch hẹn cần xóa.");
             }
 
-            bool result = _appointmentDAL.DeleteAppointment(appointmentId);
-            if (result)
+            // Kiểm tra xem lịch hẹn đã được dẫn tới ca khám bệnh (Examination) hay chưa
+            if (_appointmentDAL.IsAppointmentLinkedToExamination(appointmentId))
             {
-                return OperationResult.Success("Xóa lịch hẹn thành công!");
+                return OperationResult.Failure("Lịch hẹn này đã được tiếp nhận và tạo hồ sơ khám bệnh! Vui lòng chuyển trạng thái sang 'Cancelled' (Hủy) thay vì xóa.");
             }
 
-            return OperationResult.Failure("Xóa lịch hẹn thất bại.");
+            try
+            {
+                bool result = _appointmentDAL.DeleteAppointment(appointmentId);
+                if (result)
+                {
+                    return OperationResult.Success("Xóa lịch hẹn thành công!");
+                }
+                return OperationResult.Failure("Xóa lịch hẹn thất bại.");
+            }
+            catch (Exception ex)
+            {
+                return OperationResult.Failure("Không thể xóa lịch hẹn do có dữ liệu liên kết: " + ex.Message);
+            }
         }
     }
 }

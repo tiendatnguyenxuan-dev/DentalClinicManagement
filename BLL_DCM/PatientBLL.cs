@@ -9,6 +9,7 @@ namespace BLL_DCM
     public class PatientBLL
     {
         private readonly PatientDAL _patientDAL = new();
+        private readonly AppointmentDAL _appointmentDAL = new();
 
         // Lấy danh sách bệnh nhân
         public List<PatientDTO> GetAllPatients()
@@ -34,6 +35,53 @@ namespace BLL_DCM
             return added ? (true, "Thêm bệnh nhân thành công!") : (false, "Không thể thêm bệnh nhân.");
         }
 
+        // Đăng ký bệnh nhân mới VÀ tự động tiếp nhận vào hàng đợi khám với lý do khám
+        public (bool IsSuccess, string Message, int PatientId) RegisterAndQueue(PatientDTO patient, string? reason, int? doctorId = null)
+        {
+            var validation = ValidatePatient(patient, isUpdate: false);
+            if (!validation.IsValid)
+                return (false, validation.Message, 0);
+
+            try
+            {
+                int newPatientId = _patientDAL.AddAndReturnId(patient);
+                if (newPatientId <= 0)
+                {
+                    return (false, "Không thể lưu thông tin bệnh nhân.", 0);
+                }
+
+                // Nếu chưa chỉ định bác sĩ, lấy bác sĩ đầu tiên có sẵn trong hệ thống
+                int targetDoctorId = doctorId ?? 0;
+                if (targetDoctorId <= 0)
+                {
+                    var doctors = _appointmentDAL.GetDoctorLookupList();
+                    if (doctors.Count > 0)
+                    {
+                        targetDoctorId = doctors[0].EmployeeID;
+                    }
+                }
+
+                if (targetDoctorId > 0)
+                {
+                    var appointment = new AppointmentDTO
+                    {
+                        PatientID = newPatientId,
+                        DoctorID = targetDoctorId,
+                        AppointmentDateTime = DateTime.Now,
+                        AppointmentStatus = "Confirmed", // Trạng thái đã tiếp nhận tại phòng khám
+                        Notes = string.IsNullOrWhiteSpace(reason) ? "Khám bệnh nhân mới" : reason.Trim()
+                    };
+                    _appointmentDAL.AddAppointment(appointment);
+                }
+
+                return (true, "Thêm bệnh nhân và chuyển vào tiếp nhận khám thành công!", newPatientId);
+            }
+            catch (Exception ex)
+            {
+                return (false, "Lỗi tiếp nhận khám: " + ex.Message, 0);
+            }
+        }
+
         // Cập nhật bệnh nhân
         public (bool IsSuccess, string Message) UpdatePatient(PatientDTO patient)
         {
@@ -55,13 +103,29 @@ namespace BLL_DCM
             return deleted ? (true, "Đã xóa bệnh nhân thành công!") : (false, "Không thể xóa bệnh nhân.");
         }
 
-        // Tìm kiếm bệnh nhân
+        // Tìm kiếm bệnh nhân trên danh sách trong bộ nhớ (Đáp ứng yêu cầu: Tìm kiếm trên ArrayList/List trong BUS)
         public List<PatientDTO> SearchPatients(string keyword)
         {
+            List<PatientDTO> allList = GetAllPatients();
             if (string.IsNullOrWhiteSpace(keyword))
-                return GetAllPatients();
+                return allList;
 
-            return _patientDAL.Search(keyword.Trim());
+            string key = keyword.Trim().ToLower();
+            var result = new List<PatientDTO>();
+
+            // Duyệt tuần tự trên List<PatientDTO> trong tầng BUS
+            foreach (var p in allList)
+            {
+                if (p.PatientID.ToString().Contains(key) ||
+                    (!string.IsNullOrEmpty(p.FullName) && p.FullName.ToLower().Contains(key)) ||
+                    (!string.IsNullOrEmpty(p.Phone) && p.Phone.Contains(key)) ||
+                    (!string.IsNullOrEmpty(p.Email) && p.Email.ToLower().Contains(key)))
+                {
+                    result.Add(p);
+                }
+            }
+
+            return result;
         }
 
         private (bool IsValid, string Message) ValidatePatient(PatientDTO patient, bool isUpdate)

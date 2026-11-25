@@ -1,4 +1,4 @@
-﻿using BLL_DCM;
+using BLL_DCM;
 using DTO_DCM;
 
 namespace GUI_DCM
@@ -7,10 +7,12 @@ namespace GUI_DCM
     {
         private readonly AppointmentBLL _appointmentBLL = new AppointmentBLL();
         private List<AppointmentDTO> _currentList = new List<AppointmentDTO>();
+        private readonly AccountDTO? _currentUser;
 
-        public FormAppointment()
+        public FormAppointment(AccountDTO? currentUser = null)
         {
             InitializeComponent();
+            _currentUser = currentUser;
             InitFilterControls();
             LoadAppointments();
         }
@@ -184,6 +186,17 @@ namespace GUI_DCM
                     MessageBox.Show(result.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
+        }
+
+        private void btnStartExam_Click(object sender, EventArgs e)
+        {
+            var selected = GetSelectedAppointment();
+            if (selected == null) return;
+
+            // Mở form khám bệnh truyền lịch hẹn sang
+            var formExam = new DentalClinicManagement.FormExamination(selected, _currentUser);
+            formExam.ShowDialog();
+            LoadAppointments();
         }
     }
 }

@@ -18,9 +18,9 @@ namespace DAL_DCM
 
                 string query = @"
                     INSERT INTO Patient
-                    (FullName, DateOfBirth, Gender, Phone, Email, Address, MedicalHistory, Allergies, IsDeleted)
+                    (FullName, DateOfBirth, Gender, Phone, Email, Address, MedicalHistory, Allergies, PatientStatus)
                     VALUES
-                    (@FullName, @DateOfBirth, @Gender, @Phone, @Email, @Address, @MedicalHistory, @Allergies, 0);";
+                    (@FullName, @DateOfBirth, @Gender, @Phone, @Email, @Address, @MedicalHistory, @Allergies, 'Active');";
 
                 using (MySqlCommand cmd = new MySqlCommand(query, conn))
                 {
@@ -38,7 +38,38 @@ namespace DAL_DCM
             }
         }
 
-        // 2. Lấy tất cả bệnh nhân chưa bị xóa mềm
+        // 1.1 Thêm mới bệnh nhân và trả về ID vừa sinh
+        public int AddAndReturnId(PatientDTO patient)
+        {
+            using (MySqlConnection conn = _db.GetConnection())
+            {
+                conn.Open();
+
+                string query = @"
+                    INSERT INTO Patient
+                    (FullName, DateOfBirth, Gender, Phone, Email, Address, MedicalHistory, Allergies, PatientStatus)
+                    VALUES
+                    (@FullName, @DateOfBirth, @Gender, @Phone, @Email, @Address, @MedicalHistory, @Allergies, 'Active');
+                    SELECT LAST_INSERT_ID();";
+
+                using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@FullName", patient.FullName);
+                    cmd.Parameters.AddWithValue("@DateOfBirth", (object?)patient.DateOfBirth ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Gender", (object?)patient.Gender ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Phone", (object?)patient.Phone ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Email", (object?)patient.Email ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Address", (object?)patient.Address ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@MedicalHistory", (object?)patient.MedicalHistory ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Allergies", (object?)patient.Allergies ?? DBNull.Value);
+
+                    object result = cmd.ExecuteScalar();
+                    return Convert.ToInt32(result);
+                }
+            }
+        }
+
+        // 2. Lấy tất cả bệnh nhân đang hoạt động (Active)
         public List<PatientDTO> GetAll()
         {
             List<PatientDTO> list = new();
@@ -47,7 +78,7 @@ namespace DAL_DCM
                 conn.Open();
                 string query = @"
                     SELECT * FROM Patient
-                    WHERE IsDeleted = 0
+                    WHERE PatientStatus = 'Active'
                     ORDER BY PatientID DESC;";
 
                 using (MySqlCommand cmd = new MySqlCommand(query, conn))
@@ -70,7 +101,7 @@ namespace DAL_DCM
                 conn.Open();
                 string query = @"
                     SELECT * FROM Patient
-                    WHERE PatientID = @PatientID AND IsDeleted = 0
+                    WHERE PatientID = @PatientID AND PatientStatus = 'Active'
                     LIMIT 1;";
 
                 using (MySqlCommand cmd = new MySqlCommand(query, conn))
@@ -105,7 +136,7 @@ namespace DAL_DCM
                         Address = @Address,
                         MedicalHistory = @MedicalHistory,
                         Allergies = @Allergies
-                    WHERE PatientID = @PatientID AND IsDeleted = 0;";
+                    WHERE PatientID = @PatientID AND PatientStatus = 'Active';";
 
                 using (MySqlCommand cmd = new MySqlCommand(query, conn))
                 {
@@ -124,7 +155,7 @@ namespace DAL_DCM
             }
         }
 
-        // 5. XÓA MỀM BỆNH NHÂN (Cập nhật IsDeleted = 1)
+        // 5. XÓA MỀM BỆNH NHÂN (Cập nhật PatientStatus = 'Inactive')
         public bool Delete(int patientId)
         {
             using (MySqlConnection conn = _db.GetConnection())
@@ -132,7 +163,7 @@ namespace DAL_DCM
                 conn.Open();
                 string query = @"
                     UPDATE Patient
-                    SET IsDeleted = 1
+                    SET PatientStatus = 'Inactive'
                     WHERE PatientID = @PatientID;";
 
                 using (MySqlCommand cmd = new MySqlCommand(query, conn))
@@ -152,7 +183,7 @@ namespace DAL_DCM
                 conn.Open();
                 string query = @"
                     SELECT * FROM Patient
-                    WHERE IsDeleted = 0 
+                    WHERE PatientStatus = 'Active' 
                       AND (CAST(PatientID AS CHAR) LIKE @Keyword
                            OR FullName LIKE @Keyword
                            OR Phone LIKE @Keyword
@@ -189,7 +220,7 @@ namespace DAL_DCM
                 MedicalHistory = reader["MedicalHistory"] == DBNull.Value ? null : reader["MedicalHistory"].ToString(),
                 Allergies = reader["Allergies"] == DBNull.Value ? null : reader["Allergies"].ToString(),
                 RegistrationDate = Convert.ToDateTime(reader["RegistrationDate"]),
-                IsDeleted = reader["IsDeleted"] != DBNull.Value && Convert.ToBoolean(reader["IsDeleted"])
+                PatientStatus = reader["PatientStatus"]?.ToString() ?? "Active"
             };
         }
     }

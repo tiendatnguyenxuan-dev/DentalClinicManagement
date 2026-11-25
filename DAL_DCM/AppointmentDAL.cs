@@ -1,4 +1,4 @@
-﻿using MySqlConnector;
+using MySqlConnector;
 using DTO_DCM;
 using System;
 using System.Collections.Generic;
@@ -34,7 +34,20 @@ namespace DAL_DCM
                     INNER JOIN Patient p ON a.PatientID = p.PatientID
                     INNER JOIN Employee e ON a.DoctorID = e.EmployeeID
                     LEFT JOIN Specialty s ON e.SpecialtyID = s.SpecialtyID
-                    ORDER BY a.AppointmentDateTime DESC";
+                    ORDER BY 
+                        CASE 
+                            WHEN a.AppointmentStatus IN ('Pending', 'Confirmed') THEN 1 
+                            ELSE 2 
+                        END ASC,
+                        CASE 
+                            WHEN a.AppointmentDateTime >= NOW() THEN 0 
+                            ELSE 1 
+                        END ASC,
+                        CASE 
+                            WHEN a.AppointmentDateTime >= NOW() THEN a.AppointmentDateTime 
+                            ELSE NULL 
+                        END ASC,
+                        a.AppointmentDateTime DESC";
 
                 using (MySqlCommand cmd = new MySqlCommand(query, conn))
                 {
@@ -90,7 +103,20 @@ namespace DAL_DCM
                 if (!string.IsNullOrWhiteSpace(keyword))
                     query += " AND (p.FullName LIKE @keyword OR p.Phone LIKE @keyword)";
 
-                query += " ORDER BY a.AppointmentDateTime DESC";
+                query += @" ORDER BY 
+                            CASE 
+                                WHEN a.AppointmentStatus IN ('Pending', 'Confirmed') THEN 1 
+                                ELSE 2 
+                            END ASC,
+                            CASE 
+                                WHEN a.AppointmentDateTime >= NOW() THEN 0 
+                                ELSE 1 
+                            END ASC,
+                            CASE 
+                                WHEN a.AppointmentDateTime >= NOW() THEN a.AppointmentDateTime 
+                                ELSE NULL 
+                            END ASC,
+                            a.AppointmentDateTime DESC";
 
                 using (MySqlCommand cmd = new MySqlCommand(query, conn))
                 {
@@ -194,6 +220,23 @@ namespace DAL_DCM
         }
 
         /// <summary>
+        /// Kiểm tra lịch hẹn đã có hồ sơ khám bệnh liên kết hay chưa
+        /// </summary>
+        public bool IsAppointmentLinkedToExamination(int appointmentId)
+        {
+            using (MySqlConnection conn = _db.GetConnection())
+            {
+                string query = "SELECT COUNT(1) FROM Examination WHERE AppointmentID = @appointmentId";
+                using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@appointmentId", appointmentId);
+                    conn.Open();
+                    return Convert.ToInt32(cmd.ExecuteScalar()) > 0;
+                }
+            }
+        }
+
+        /// <summary>
         /// Xóa lịch hẹn
         /// </summary>
         public bool DeleteAppointment(int appointmentId)
@@ -292,7 +335,7 @@ namespace DAL_DCM
                 string query = @"
             SELECT PatientID, FullName, Phone
             FROM Patient
-            WHERE IsDeleted = 0
+            WHERE PatientStatus = 'Active'
             ORDER BY FullName ASC";
 
                 using (MySqlCommand cmd = new MySqlCommand(query, conn))

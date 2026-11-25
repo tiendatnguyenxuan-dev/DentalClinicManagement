@@ -14,7 +14,8 @@ namespace DTO_DCM
         public string? MedicalHistory { get; set; }
         public string? Allergies { get; set; }
         public DateTime RegistrationDate { get; set; } = DateTime.Now;
-        public bool IsDeleted { get; set; } = false;
+        public string PatientStatus { get; set; } = "Active"; // 'Active', 'Inactive'
+        public bool IsDeleted => PatientStatus == "Inactive";
 
         public PatientDTO() { }
 

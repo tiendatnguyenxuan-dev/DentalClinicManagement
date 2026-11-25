@@ -19,12 +19,12 @@ namespace DAL_DCM
 
             string query = @"
                 SELECT ws.ScheduleID,
-                       ws.DoctorID,
+                       ws.EmployeeID AS DoctorID,
                        e.FullName AS DoctorName,
                        ws.WorkDate,
                        ws.Shift
                 FROM WorkSchedule ws
-                INNER JOIN Employee e ON ws.DoctorID = e.EmployeeID
+                INNER JOIN Employee e ON ws.EmployeeID = e.EmployeeID
                 ORDER BY ws.WorkDate DESC, ws.Shift";
 
             using var cmd = new MySqlCommand(query, conn);
@@ -48,12 +48,12 @@ namespace DAL_DCM
 
             string query = @"
                 SELECT ws.ScheduleID,
-                       ws.DoctorID,
+                       ws.EmployeeID AS DoctorID,
                        e.FullName AS DoctorName,
                        ws.WorkDate,
                        ws.Shift
                 FROM WorkSchedule ws
-                INNER JOIN Employee e ON ws.DoctorID = e.EmployeeID
+                INNER JOIN Employee e ON ws.EmployeeID = e.EmployeeID
                 WHERE ws.WorkDate >= @FromDate AND ws.WorkDate <= @ToDate
                 ORDER BY ws.WorkDate ASC, ws.Shift ASC";
 
@@ -81,13 +81,13 @@ namespace DAL_DCM
 
             string query = @"
                 SELECT ws.ScheduleID,
-                       ws.DoctorID,
+                       ws.EmployeeID AS DoctorID,
                        e.FullName AS DoctorName,
                        ws.WorkDate,
                        ws.Shift
                 FROM WorkSchedule ws
-                INNER JOIN Employee e ON ws.DoctorID = e.EmployeeID
-                WHERE ws.DoctorID = @DoctorID 
+                INNER JOIN Employee e ON ws.EmployeeID = e.EmployeeID
+                WHERE ws.EmployeeID = @DoctorID 
                   AND ws.WorkDate = @WorkDate
                   AND ws.ScheduleID != @ExcludeScheduleID";
 
@@ -128,12 +128,12 @@ namespace DAL_DCM
 
             string query = @"
                 SELECT ws.ScheduleID,
-                       ws.DoctorID,
+                       ws.EmployeeID AS DoctorID,
                        e.FullName AS DoctorName,
                        ws.WorkDate,
                        ws.Shift
                 FROM WorkSchedule ws
-                INNER JOIN Employee e ON ws.DoctorID = e.EmployeeID
+                INNER JOIN Employee e ON ws.EmployeeID = e.EmployeeID
                 WHERE ws.ScheduleID = @ScheduleID";
 
             using var cmd = new MySqlCommand(query, conn);
@@ -154,7 +154,7 @@ namespace DAL_DCM
             conn.Open();
 
             string query = @"
-                INSERT INTO WorkSchedule (DoctorID, WorkDate, Shift)
+                INSERT INTO WorkSchedule (EmployeeID, WorkDate, Shift)
                 VALUES (@DoctorID, @WorkDate, @Shift)";
 
             using var cmd = new MySqlCommand(query, conn);
@@ -174,7 +174,7 @@ namespace DAL_DCM
 
             string query = @"
                 UPDATE WorkSchedule
-                SET DoctorID = @DoctorID,
+                SET EmployeeID = @DoctorID,
                     WorkDate = @WorkDate,
                     Shift = @Shift
                 WHERE ScheduleID = @ScheduleID";
@@ -215,13 +215,13 @@ namespace DAL_DCM
 
             string query = @"
                 SELECT ws.ScheduleID,
-                       ws.DoctorID,
+                       ws.EmployeeID AS DoctorID,
                        e.FullName AS DoctorName,
                        ws.WorkDate,
                        ws.Shift
                 FROM WorkSchedule ws
-                INNER JOIN Employee e ON ws.DoctorID = e.EmployeeID
-                WHERE CAST(ws.DoctorID AS CHAR) LIKE @Keyword
+                INNER JOIN Employee e ON ws.EmployeeID = e.EmployeeID
+                WHERE CAST(ws.EmployeeID AS CHAR) LIKE @Keyword
                    OR e.FullName LIKE @Keyword
                    OR ws.Shift LIKE @Keyword
                 ORDER BY ws.WorkDate DESC, ws.Shift";
